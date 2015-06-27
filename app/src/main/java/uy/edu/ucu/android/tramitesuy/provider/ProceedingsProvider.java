@@ -5,7 +5,9 @@ import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.text.TextUtils;
 
 import uy.edu.ucu.android.tramitesuy.data.ProceedingsOpenHelper;
 
@@ -23,9 +25,12 @@ public class ProceedingsProvider extends ContentProvider {
     private ProceedingsOpenHelper mOpenHelper;
 
     // TODO: For each type of URI you want to add, create a corresponding code.
-    static final int PROCEEDING = 100;
-    static final int CATEGORY = 300;
-    static final int LOCATION = 400;
+    static final int PROCEEDING_DIR = 100;
+    static final int PROCEEDING_ITEM = 101;
+    static final int CATEGORY_DIR = 300;
+    static final int CATEGORY_ITEM = 301;
+    static final int LOCATION_DIR = 400;
+    static final int LOCATION_ITEM = 401;
 
 
     public ProceedingsProvider() {}
@@ -39,9 +44,12 @@ public class ProceedingsProvider extends ContentProvider {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = ProceedingsContract.CONTENT_AUTHORITY;
 
-        matcher.addURI(authority, ProceedingsContract.PATH_PROCEEDING, PROCEEDING);
-        matcher.addURI(authority, ProceedingsContract.PATH_CATEGORY, CATEGORY);
-        matcher.addURI(authority, ProceedingsContract.PATH_LOCATION, LOCATION);
+        matcher.addURI(authority, ProceedingsContract.PATH_PROCEEDING, PROCEEDING_DIR);
+        matcher.addURI(authority, ProceedingsContract.PATH_PROCEEDING + "/#", PROCEEDING_ITEM);
+        matcher.addURI(authority, ProceedingsContract.PATH_CATEGORY, CATEGORY_DIR);
+        matcher.addURI(authority, ProceedingsContract.PATH_CATEGORY + "/#", CATEGORY_ITEM);
+        matcher.addURI(authority, ProceedingsContract.PATH_LOCATION, LOCATION_DIR);
+        matcher.addURI(authority, ProceedingsContract.PATH_LOCATION + "/#", LOCATION_ITEM);
         //TODO: add missing matches for the new URIs and their respective code
 
         return matcher;
@@ -59,11 +67,17 @@ public class ProceedingsProvider extends ContentProvider {
 
         switch (match) {
             // add missing MIME types for the URis you added above
-            case CATEGORY:
+            case CATEGORY_DIR:
                 return ProceedingsContract.CategoryEntry.CONTENT_TYPE;
-            case LOCATION:
+            case CATEGORY_ITEM:
+                return ProceedingsContract.CategoryEntry.CONTENT_ITEM_TYPE;
+            case LOCATION_DIR:
                 return ProceedingsContract.LocationEntry.CONTENT_TYPE;
-            case PROCEEDING:
+            case LOCATION_ITEM:
+                return ProceedingsContract.LocationEntry.CONTENT_ITEM_TYPE;
+            case PROCEEDING_DIR:
+                return ProceedingsContract.ProceedingEntry.CONTENT_TYPE;
+            case PROCEEDING_ITEM:
                 return ProceedingsContract.ProceedingEntry.CONTENT_ITEM_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -95,7 +109,38 @@ public class ProceedingsProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
         //TODO: implementar las queries que sean necesarias en su app de acuerdo a lo visto en clase
-        throw new UnsupportedOperationException("Not yet implemented");
+        SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        SQLiteQueryBuilder sb = new SQLiteQueryBuilder();
+        switch (mUriMatcher.match(uri)){
+            case PROCEEDING_DIR:
+                sb.setTables(ProceedingsContract.ProceedingEntry.TABLE_NAME);
+                break;
+            case PROCEEDING_ITEM:
+                sb.setTables(ProceedingsContract.ProceedingEntry.TABLE_NAME);
+                sb.appendWhere("_ID = "+uri.getPathSegments().get(1));
+                break;
+            case CATEGORY_DIR:
+                sb.setTables(ProceedingsContract.CategoryEntry.TABLE_NAME);
+                break;
+            case CATEGORY_ITEM:
+                sb.setTables(ProceedingsContract.CategoryEntry.TABLE_NAME);
+                sb.appendWhere("_ID = "+uri.getPathSegments().get(1));
+                break;
+            case LOCATION_DIR:
+                sb.setTables(ProceedingsContract.LocationEntry.TABLE_NAME);
+                break;
+            case LOCATION_ITEM:
+                sb.setTables(ProceedingsContract.LocationEntry.TABLE_NAME);
+                sb.appendWhere("_ID = "+uri.getPathSegments().get(1));
+                break;
+            default:
+                throw new UnsupportedOperationException("Not yet implemented");
+        }
+        if (TextUtils.isEmpty(sortOrder))
+            sortOrder = "_ID ASC";
+        Cursor result = sb.query(db,projection,selection,selectionArgs, null,null,sortOrder);
+        result.setNotificationUri(getContext().getContentResolver(), uri);
+        return result;
     }
 
 
@@ -123,8 +168,27 @@ public class ProceedingsProvider extends ContentProvider {
      */
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        // TODO: implementar en caso de que lo crean necesario en su app
-        throw new UnsupportedOperationException("Not yet implemented");
+        SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        String table;
+        switch (mUriMatcher.match(uri)){
+            case PROCEEDING_DIR:
+            case PROCEEDING_ITEM:
+                table = ProceedingsContract.ProceedingEntry.TABLE_NAME;
+                break;
+            case CATEGORY_DIR:
+            case CATEGORY_ITEM:
+                table = ProceedingsContract.CategoryEntry.TABLE_NAME;
+                break;
+            case LOCATION_DIR:
+            case LOCATION_ITEM:
+                table = ProceedingsContract.LocationEntry.TABLE_NAME;
+                break;
+            default:
+                throw new UnsupportedOperationException("Not yet implemented");
+        }
+        int result = db.delete(table, selection, selectionArgs);
+        getContext().getContentResolver().notifyChange(uri, null);
+        return result;
     }
 
 
@@ -140,7 +204,7 @@ public class ProceedingsProvider extends ContentProvider {
         final int match = mUriMatcher.match(uri);
         Uri returnUri;
         switch (match){
-            case CATEGORY: {
+            case CATEGORY_DIR: {
                 long _id = db.insert(ProceedingsContract.CategoryEntry.TABLE_NAME, null, values);
                 if (_id > 0)
                     returnUri = ProceedingsContract.CategoryEntry.buildCategoryUri(_id);
@@ -148,7 +212,7 @@ public class ProceedingsProvider extends ContentProvider {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;
             }
-            case PROCEEDING: {
+            case PROCEEDING_DIR: {
                 long _id = db.insert(ProceedingsContract.ProceedingEntry.TABLE_NAME, null, values);
                 if (_id > 0)
                     returnUri = ProceedingsContract.ProceedingEntry.buildProceedingUri(_id);
@@ -156,7 +220,7 @@ public class ProceedingsProvider extends ContentProvider {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;
             }
-            case LOCATION: {
+            case LOCATION_DIR: {
                 long _id = db.insert(ProceedingsContract.LocationEntry.TABLE_NAME, null, values);
                 if (_id > 0)
                     returnUri = ProceedingsContract.LocationEntry.buildLocationProceeding(_id);
@@ -186,7 +250,7 @@ public class ProceedingsProvider extends ContentProvider {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = mUriMatcher.match(uri);
         switch (match) {
-            case PROCEEDING:
+            case PROCEEDING_DIR:
                 db.beginTransaction();
                 int returnCount = 0;
                 try {
