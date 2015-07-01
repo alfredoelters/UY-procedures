@@ -7,7 +7,33 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+        <service
+            android:name=".service.LoadProceedingsService"
+            android:exported="false" >
+        </service>
+        <provider
+            android:authorities="uy.edu.ucu.android.tramitesuy"
+            android:name=".provider.ProceedingsProvider"
+            android:exported="false"/>
+        <activity android:name=".activities.HomeActivity" >
+        </activity>
+        <activity android:name=".activities.SplashScreenActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="uy.edu.ucu.android.tramitesuy.service.receiver.PROGRESS" />
+                <action android:name="uy.edu.ucu.android.tramitesuy.service.receiver.FINISHED" />
+            </intent-filter>
+        </activity>
 
+        <receiver
+            android:name=".service.LoadFinishedBroadcastReceiver"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="uy.edu.ucu.android.tramitesuy.service.receiver.PROGRESS" />
+                <action android:name="uy.edu.ucu.android.tramitesuy.service.receiver.FINISHED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
