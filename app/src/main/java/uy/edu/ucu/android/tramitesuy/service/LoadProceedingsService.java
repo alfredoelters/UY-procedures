@@ -2,17 +2,9 @@ package uy.edu.ucu.android.tramitesuy.service;
 
 import android.app.Activity;
 import android.app.IntentService;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.preference.PreferenceManager;
-import android.support.v7.app.NotificationCompat;
 
-import uy.edu.ucu.android.tramitesuy.R;
-import uy.edu.ucu.android.tramitesuy.activities.HomeActivity;
-import uy.edu.ucu.android.tramitesuy.constants.PreferencesConstants;
-import uy.edu.ucu.android.tramitesuy.data.ProceedingsOpenHelper;
 import uy.edu.ucu.android.tramitesuy.util.Utils;
 
 /**

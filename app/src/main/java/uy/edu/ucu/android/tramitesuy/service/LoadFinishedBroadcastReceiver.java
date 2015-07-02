@@ -10,7 +10,7 @@ import android.os.Bundle;
 import android.support.v7.app.NotificationCompat;
 
 import uy.edu.ucu.android.tramitesuy.R;
-import uy.edu.ucu.android.tramitesuy.activities.HomeActivity;
+import uy.edu.ucu.android.tramitesuy.activities.MainActivity;
 import uy.edu.ucu.android.tramitesuy.constants.PreferencesConstants;
 
 public class LoadFinishedBroadcastReceiver extends BroadcastReceiver {
@@ -34,11 +34,12 @@ public class LoadFinishedBroadcastReceiver extends BroadcastReceiver {
                         mBuilder.setContentText(context.getString(R.string.load_notification_text_success));
                         context.getSharedPreferences(PreferencesConstants.PREF_NAME,
                                 Context.MODE_PRIVATE).edit()
-                                .putBoolean(PreferencesConstants.PREF_LOADED_PROCEEDINGS,true);
+                                .putBoolean(PreferencesConstants.PREF_LOADED_PROCEEDINGS, true);
                     } else {
                         mBuilder.setContentText(context.getString(R.string.load_notification_text_failure));
                     }
-                    Intent notificationIntent = new Intent(context, HomeActivity.class);
+                    mBuilder.setAutoCancel(true);
+                    Intent notificationIntent = new Intent(context, MainActivity.class);
 
                     notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                             | Intent.FLAG_ACTIVITY_SINGLE_TOP);
