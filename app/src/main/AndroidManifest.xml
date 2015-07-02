@@ -15,7 +15,7 @@
             android:authorities="uy.edu.ucu.android.tramitesuy"
             android:name=".provider.ProceedingsProvider"
             android:exported="false"/>
-        <activity android:name=".activities.HomeActivity" >
+        <activity android:name=".activities.MainActivity" >
         </activity>
         <activity android:name=".activities.SplashScreenActivity" >
             <intent-filter>

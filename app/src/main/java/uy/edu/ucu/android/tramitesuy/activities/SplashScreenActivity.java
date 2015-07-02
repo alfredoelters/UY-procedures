@@ -3,7 +3,6 @@ package uy.edu.ucu.android.tramitesuy.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 
 import uy.edu.ucu.android.tramitesuy.R;
 import uy.edu.ucu.android.tramitesuy.constants.PreferencesConstants;
@@ -40,7 +39,7 @@ public class SplashScreenActivity extends Activity{
 //        mConnectionTimeoutTimer.cancel();
         // Start the next activity
         Intent mainIntent = new Intent().setClass(
-                this, HomeActivity.class);
+                this, MainActivity.class);
         startActivity(mainIntent);
         // Close the activity so the user won't able to go back this
         // activity pressing Back button
