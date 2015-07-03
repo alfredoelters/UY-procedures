@@ -110,37 +110,40 @@ public class ProceedingsProvider extends ContentProvider {
                         String[] selectionArgs, String sortOrder) {
         //TODO: implementar las queries que sean necesarias en su app de acuerdo a lo visto en clase
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-        SQLiteQueryBuilder sb = new SQLiteQueryBuilder();
+        Cursor cursor;
         switch (mUriMatcher.match(uri)){
             case PROCEEDING_DIR:
-                sb.setTables(ProceedingsContract.ProceedingEntry.TABLE_NAME);
+                cursor = db.query(ProceedingsContract.ProceedingEntry.TABLE_NAME, projection,
+                        selection, selectionArgs, null, null, sortOrder);
                 break;
             case PROCEEDING_ITEM:
-                sb.setTables(ProceedingsContract.ProceedingEntry.TABLE_NAME);
-                sb.appendWhere("_ID = "+uri.getPathSegments().get(1));
+                cursor = db.query(ProceedingsContract.ProceedingEntry.TABLE_NAME, projection,
+                        selection, selectionArgs, null, null, sortOrder);
                 break;
             case CATEGORY_DIR:
-                sb.setTables(ProceedingsContract.CategoryEntry.TABLE_NAME);
+                cursor = db.query(ProceedingsContract.CategoryEntry.TABLE_NAME, projection,
+                        selection, selectionArgs, null, null, sortOrder);
                 break;
             case CATEGORY_ITEM:
-                sb.setTables(ProceedingsContract.CategoryEntry.TABLE_NAME);
-                sb.appendWhere("_ID = "+uri.getPathSegments().get(1));
+                String where = ProceedingsContract.CategoryEntry._ID + " = ?";
+                long categoryId = Long.parseLong(uri.getPathSegments().get(1));
+                String[] whereArgs = {String.valueOf(categoryId)};
+                cursor = db.query(ProceedingsContract.CategoryEntry.TABLE_NAME, projection,
+                        where, whereArgs, null, null, sortOrder);
                 break;
             case LOCATION_DIR:
-                sb.setTables(ProceedingsContract.LocationEntry.TABLE_NAME);
+                cursor = db.query(ProceedingsContract.LocationEntry.TABLE_NAME, projection,
+                        selection, selectionArgs, null, null, sortOrder);
                 break;
             case LOCATION_ITEM:
-                sb.setTables(ProceedingsContract.LocationEntry.TABLE_NAME);
-                sb.appendWhere("_ID = "+uri.getPathSegments().get(1));
+                cursor = db.query(ProceedingsContract.LocationEntry.TABLE_NAME, projection,
+                        selection, selectionArgs, null, null, sortOrder);
                 break;
             default:
                 throw new UnsupportedOperationException("Not yet implemented");
         }
-        if (TextUtils.isEmpty(sortOrder))
-            sortOrder = "_ID ASC";
-        Cursor result = sb.query(db,projection,selection,selectionArgs, null,null,sortOrder);
-        result.setNotificationUri(getContext().getContentResolver(), uri);
-        return result;
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
+        return cursor;
     }
 
 

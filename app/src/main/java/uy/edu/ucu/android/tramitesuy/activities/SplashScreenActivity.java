@@ -38,8 +38,7 @@ public class SplashScreenActivity extends Activity{
     private void startHomeActivity() {
 //        mConnectionTimeoutTimer.cancel();
         // Start the next activity
-        Intent mainIntent = new Intent().setClass(
-                this, MainActivity.class);
+        Intent mainIntent = new Intent(this, MainActivity.class);
         startActivity(mainIntent);
         // Close the activity so the user won't able to go back this
         // activity pressing Back button
