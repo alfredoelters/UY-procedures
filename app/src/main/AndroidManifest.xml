@@ -1,36 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="uy.edu.ucu.android.tramitesuy" >
+    package="uy.edu.ucu.android.tramitesuy">
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <service
             android:name=".service.LoadProceedingsService"
-            android:exported="false" >
-        </service>
+            android:exported="false"></service>
+
         <provider
-            android:authorities="uy.edu.ucu.android.tramitesuy"
             android:name=".provider.ProceedingsProvider"
-            android:exported="false"/>
-        <activity android:name=".activities.MainActivity" >
-        </activity>
-        <activity android:name=".activities.SplashScreenActivity" >
+            android:authorities="uy.edu.ucu.android.tramitesuy"
+            android:exported="false" />
+
+        <activity android:name=".activities.MainActivity"></activity>
+        <activity
+            android:name=".activities.SplashScreenActivity"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
+
                 <action android:name="uy.edu.ucu.android.tramitesuy.service.receiver.PROGRESS" />
                 <action android:name="uy.edu.ucu.android.tramitesuy.service.receiver.FINISHED" />
             </intent-filter>
         </activity>
 
         <receiver
-            android:name=".service.LoadFinishedBroadcastReceiver"
-            android:exported="false" >
+            android:name=".receivers.LoadFinishedBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false">
             <intent-filter>
-                <action android:name="uy.edu.ucu.android.tramitesuy.service.receiver.PROGRESS" />
                 <action android:name="uy.edu.ucu.android.tramitesuy.service.receiver.FINISHED" />
             </intent-filter>
         </receiver>
