@@ -1,4 +1,4 @@
-package uy.edu.ucu.android.tramitesuy.service;
+package uy.edu.ucu.android.tramitesuy.receivers;
 
 import android.app.Activity;
 import android.app.NotificationManager;
@@ -12,12 +12,14 @@ import android.support.v7.app.NotificationCompat;
 import uy.edu.ucu.android.tramitesuy.R;
 import uy.edu.ucu.android.tramitesuy.activities.MainActivity;
 import uy.edu.ucu.android.tramitesuy.constants.PreferencesConstants;
+import uy.edu.ucu.android.tramitesuy.service.LoadProceedingsService;
 
 public class LoadFinishedBroadcastReceiver extends BroadcastReceiver {
-    private static final int NOTIFICATION_ID = 1;
+    public static final int NOTIFICATION_ID = 1;
 
     public LoadFinishedBroadcastReceiver() {
     }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         switch (intent.getAction()){

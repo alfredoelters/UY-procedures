@@ -1,6 +1,8 @@
 package uy.edu.ucu.android.tramitesuy.activities;
 
+import android.app.NotificationManager;
 import android.os.Bundle;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -9,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import uy.edu.ucu.android.tramitesuy.R;
+import uy.edu.ucu.android.tramitesuy.receivers.LoadFinishedBroadcastReceiver;
 
 ;
 
@@ -30,9 +33,8 @@ public class MainActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayShowTitleEnabled(false);
             actionBar.setLogo(R.mipmap.ic_launcher);
-            actionBar.setDisplayHomeAsUpEnabled(true);
         }
-
+       NotificationManagerCompat.from(this).cancel(LoadFinishedBroadcastReceiver.NOTIFICATION_ID);
     }
 
     private void setupDrawer(){
