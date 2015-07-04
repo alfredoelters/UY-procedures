@@ -1,6 +1,5 @@
 package uy.edu.ucu.android.tramitesuy.activities;
 
-import android.app.NotificationManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -16,7 +15,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import uy.edu.ucu.android.tramitesuy.R;
-import uy.edu.ucu.android.tramitesuy.fragment.HomeFragment;
+import uy.edu.ucu.android.tramitesuy.fragment.ProceedingsListFragment;
 import uy.edu.ucu.android.tramitesuy.receivers.LoadFinishedBroadcastReceiver;
 
 ;
@@ -24,7 +23,7 @@ import uy.edu.ucu.android.tramitesuy.receivers.LoadFinishedBroadcastReceiver;
 /**
  * Created by alfredo on 30/06/15.
  */
-public class MainActivity extends AppCompatActivity implements HomeFragment.OnFragmentInteractionListener{
+public class MainActivity extends AppCompatActivity implements ProceedingsListFragment.OnFragmentInteractionListener{
     private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
@@ -46,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements HomeFragment.OnFr
         setupDrawer();
         if(savedInstanceState == null){
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.main_content_frame, HomeFragment.newInstance())
+                    .add(R.id.container, ProceedingsListFragment.newInstance())
                     .commit();
         }
        NotificationManagerCompat.from(this).cancel(LoadFinishedBroadcastReceiver.NOTIFICATION_ID);
