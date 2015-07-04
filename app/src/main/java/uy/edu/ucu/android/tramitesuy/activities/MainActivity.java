@@ -3,6 +3,7 @@ package uy.edu.ucu.android.tramitesuy.activities;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import uy.edu.ucu.android.tramitesuy.R;
+import uy.edu.ucu.android.tramitesuy.fragment.ProceedingDetailsFragment;
 import uy.edu.ucu.android.tramitesuy.fragment.ProceedingsListFragment;
 import uy.edu.ucu.android.tramitesuy.receivers.LoadFinishedBroadcastReceiver;
 
@@ -23,7 +25,7 @@ import uy.edu.ucu.android.tramitesuy.receivers.LoadFinishedBroadcastReceiver;
 /**
  * Created by alfredo on 30/06/15.
  */
-public class MainActivity extends AppCompatActivity implements ProceedingsListFragment.OnFragmentInteractionListener{
+public class MainActivity extends AppCompatActivity implements ProceedingsListFragment.OnFragmentInteractionListener, ProceedingDetailsFragment.OnFragmentInteractionListener{
     private Toolbar mToolbar;
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
@@ -57,8 +59,19 @@ public class MainActivity extends AppCompatActivity implements ProceedingsListFr
         mNavigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem menuItem) {
+                boolean result;
+                switch (menuItem.getItemId()){
+                    case R.id.actionTest:
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.container, ProceedingDetailsFragment.newInstance())
+                                .addToBackStack(null).commit();
+                        result = true;
+                        break;
+                    default:
+                        result = false;
+                }
                 mDrawerLayout.closeDrawers();
-                return true;
+                return result;
             }
         });
         // drawer toggle to allow action bar open/close

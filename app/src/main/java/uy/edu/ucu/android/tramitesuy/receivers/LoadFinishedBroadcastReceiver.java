@@ -36,7 +36,7 @@ public class LoadFinishedBroadcastReceiver extends BroadcastReceiver {
                         mBuilder.setContentText(context.getString(R.string.load_notification_text_success));
                         context.getSharedPreferences(PreferencesConstants.PREF_NAME,
                                 Context.MODE_PRIVATE).edit()
-                                .putBoolean(PreferencesConstants.PREF_LOADED_PROCEEDINGS, true);
+                                .putBoolean(PreferencesConstants.PREF_LOADED_PROCEEDINGS, true).commit();
                     } else {
                         mBuilder.setContentText(context.getString(R.string.load_notification_text_failure));
                     }

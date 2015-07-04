@@ -1,12 +1,12 @@
 package uy.edu.ucu.android.tramitesuy.fragment;
 
 import android.app.Activity;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import uy.edu.ucu.android.parser.model.Category;
-import uy.edu.ucu.android.parser.model.Proceeding;
 import uy.edu.ucu.android.tramitesuy.R;
 import uy.edu.ucu.android.tramitesuy.provider.ProceedingsContract;
 
@@ -37,9 +36,6 @@ public class ProceedingsListFragment extends Fragment {
     private Spinner mSpinner;
 
     private List<Category> mCategories;
-    private Category mSelectedCategory;
-    private String mSearchCriteria;
-
     private final LoaderManager.LoaderCallbacks mCategoriesLoaderCallbacks = new LoaderManager.LoaderCallbacks<Cursor>() {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -71,7 +67,8 @@ public class ProceedingsListFragment extends Fragment {
 
         }
     };
-
+    private Category mSelectedCategory;
+    private String mSearchCriteria;
     private final LoaderManager.LoaderCallbacks mProceedingsLoaderCallbacks = new LoaderManager.LoaderCallbacks<Cursor>() {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -79,8 +76,8 @@ public class ProceedingsListFragment extends Fragment {
             String[] selectionArgs;
             String selection;
             if (mSelectedCategory != null) {
-                 selection = ProceedingsContract.ProceedingEntry.COLUMN_CAT_KEY + " = ?";
-                 selectionArgs = new String[]{mSelectedCategory.getCode()};
+                selection = ProceedingsContract.ProceedingEntry.COLUMN_CAT_KEY + " = ?";
+                selectionArgs = new String[]{mSelectedCategory.getCode()};
                 loader = new CursorLoader(getActivity(),
                         ProceedingsContract.ProceedingEntry.CONTENT_URI,
                         null,
@@ -88,7 +85,7 @@ public class ProceedingsListFragment extends Fragment {
                         selectionArgs,
                         null);
             } else {
-                selectionArgs =new String[]{mSearchCriteria,mSearchCriteria};
+                selectionArgs = new String[]{mSearchCriteria, mSearchCriteria};
                 selection = ProceedingsContract.ProceedingEntry.COLUMN_DEPENDS_ON + " = ? OR" +
                         ProceedingsContract.ProceedingEntry.COLUMN_TITLE + "= ?";
                 loader = new CursorLoader(getActivity(),
@@ -124,6 +121,8 @@ public class ProceedingsListFragment extends Fragment {
     };
 
 
+    public ProceedingsListFragment() {
+    }
 
     public static ProceedingsListFragment newInstance() {
         /*
@@ -134,12 +133,6 @@ public class ProceedingsListFragment extends Fragment {
         return f;
          */
         return new ProceedingsListFragment();
-    }
-
-    public ProceedingsListFragment() {}
-
-    public interface OnFragmentInteractionListener {
-        void setTitle(String title);
     }
 
     @Override
@@ -189,14 +182,18 @@ public class ProceedingsListFragment extends Fragment {
         mListener = null;
     }
 
-    public class CategoryAdapter extends ArrayAdapter<Category>{
+    public interface OnFragmentInteractionListener {
+        void setTitle(String title);
+    }
+
+    public class CategoryAdapter extends ArrayAdapter<Category> {
 
         public CategoryAdapter(List<Category> categories) {
             super(getActivity(), -1, categories);
         }
 
-        public View getCustomView(int position, View convertView, ViewGroup parent){
-            if(convertView == null){
+        public View getCustomView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.category_item, null);
             }
             TextView categoryName = (TextView) convertView.findViewById(R.id.category_name);
@@ -206,7 +203,7 @@ public class ProceedingsListFragment extends Fragment {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            return getCustomView(position,convertView,parent);
+            return getCustomView(position, convertView, parent);
         }
 
         @Override

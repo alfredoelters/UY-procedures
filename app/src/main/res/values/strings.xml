@@ -5,4 +5,13 @@
     <string name="load_notification_text_failure">Error al intentar realizar la carga de los trámites</string>
     <string name="open_drawer_description">Abrir</string>
     <string name="close_drawer_description">Cerrar</string>
+
+    <!--ProceedingDetailsFragment-->
+    <string name="proceeding_description">Descripción</string>
+    <string name="proceeding_dependence">Dependencia</string>
+    <string name="proceeding_requirements">Requerimientos</string>
+    <string name="proceeding_url">Url</string>
+    <string name="proceeding_status">Estado</string>
+    <string name="proceeding_category">Categoría</string>
+    <string name="proceeding_when_and_where">Cuando y donde</string>
 </resources>

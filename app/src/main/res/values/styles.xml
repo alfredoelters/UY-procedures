@@ -67,5 +67,17 @@
          <item name="android:background">?attr/colorPrimary</item>
     </style>
 
+    <style name="AppTheme.links">
+        <item name="android:textColor">@color/accent</item>
+    </style>
+
+    <style name="AppTheme.header">
+        <item name="android:textColor">@color/mustard</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:background">@color/primary_darker</item>
+    </style>
+
+
+
 
 </resources>

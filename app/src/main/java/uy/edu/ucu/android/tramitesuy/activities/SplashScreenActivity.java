@@ -30,19 +30,14 @@ public class SplashScreenActivity extends Activity{
             startHomeActivity();
         }else{
             mLoadFinishedReceiver = new LoadFinishedReceiver();
-            registerReceiver(mLoadFinishedReceiver, new IntentFilter(LoadProceedingsService.NOTIFICATION_FINISHED));
             LoadProceedingsService.startActionLoad(this);
         }
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        switch (intent.getAction()){
-            case LoadProceedingsService.NOTIFICATION_FINISHED:
-                startHomeActivity();
-                break;
-        }
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(mLoadFinishedReceiver, new IntentFilter(LoadProceedingsService.NOTIFICATION_FINISHED));
     }
 
     /**
@@ -66,8 +61,11 @@ public class SplashScreenActivity extends Activity{
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onPause() {
+        super.onPause();
         unregisterReceiver(mLoadFinishedReceiver);
     }
+
+
+
 }
