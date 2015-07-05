@@ -5,4 +5,5 @@
     <string name="load_notification_text_failure">Error al intentar realizar la carga de los trámites</string>
     <string name="open_drawer_description">Abrir</string>
     <string name="close_drawer_description">Cerrar</string>
+    <string name="search_proceeding">Buscar</string>
 </resources>

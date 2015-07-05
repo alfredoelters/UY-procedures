@@ -29,6 +29,7 @@ public class ProceedingsProvider extends ContentProvider {
     static final int PROCEEDING_ITEM = 101;
     static final int CATEGORY_DIR = 300;
     static final int CATEGORY_ITEM = 301;
+    static final int CATEGORY_PROCEEDINGS = 302;
     static final int LOCATION_DIR = 400;
     static final int LOCATION_ITEM = 401;
 
@@ -48,12 +49,25 @@ public class ProceedingsProvider extends ContentProvider {
         matcher.addURI(authority, ProceedingsContract.PATH_PROCEEDING + "/#", PROCEEDING_ITEM);
         matcher.addURI(authority, ProceedingsContract.PATH_CATEGORY, CATEGORY_DIR);
         matcher.addURI(authority, ProceedingsContract.PATH_CATEGORY + "/#", CATEGORY_ITEM);
+        matcher.addURI(authority, ProceedingsContract.PATH_CATEGORY + "/*/" + ProceedingsContract.PATH_PROCEEDING, CATEGORY_PROCEEDINGS);
         matcher.addURI(authority, ProceedingsContract.PATH_LOCATION, LOCATION_DIR);
         matcher.addURI(authority, ProceedingsContract.PATH_LOCATION + "/#", LOCATION_ITEM);
         //TODO: add missing matches for the new URIs and their respective code
 
         return matcher;
     }
+
+
+    private static final SQLiteQueryBuilder sCategoryProceedingsQueryBuilder;
+
+    static{
+        sCategoryProceedingsQueryBuilder = new SQLiteQueryBuilder();
+        sCategoryProceedingsQueryBuilder.setTables(
+                ProceedingsContract.ProceedingEntry.TABLE_NAME + " LEFT OUTER JOIN " + ProceedingsContract.CategoryEntry.TABLE_NAME
+                        + " ON " + ProceedingsContract.ProceedingEntry.TABLE_NAME + "." + ProceedingsContract.ProceedingEntry.COLUMN_CAT_KEY
+                        + " = " + ProceedingsContract.CategoryEntry.TABLE_NAME + "." + ProceedingsContract.CategoryEntry._ID);
+    }
+
 
     /**
      * Gets the MIME types for the different URIs the Content Provider supports
@@ -112,33 +126,46 @@ public class ProceedingsProvider extends ContentProvider {
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         Cursor cursor;
         switch (mUriMatcher.match(uri)){
-            case PROCEEDING_DIR:
+            case PROCEEDING_DIR: {
                 cursor = db.query(ProceedingsContract.ProceedingEntry.TABLE_NAME, projection,
                         selection, selectionArgs, null, null, sortOrder);
                 break;
-            case PROCEEDING_ITEM:
+            }
+            case PROCEEDING_ITEM: {
                 cursor = db.query(ProceedingsContract.ProceedingEntry.TABLE_NAME, projection,
                         selection, selectionArgs, null, null, sortOrder);
                 break;
-            case CATEGORY_DIR:
+            }
+            case CATEGORY_DIR: {
                 cursor = db.query(ProceedingsContract.CategoryEntry.TABLE_NAME, projection,
                         selection, selectionArgs, null, null, sortOrder);
                 break;
-            case CATEGORY_ITEM:
+            }
+            case CATEGORY_ITEM: {
                 String where = ProceedingsContract.CategoryEntry._ID + " = ?";
                 long categoryId = Long.parseLong(uri.getPathSegments().get(1));
                 String[] whereArgs = {String.valueOf(categoryId)};
                 cursor = db.query(ProceedingsContract.CategoryEntry.TABLE_NAME, projection,
                         where, whereArgs, null, null, sortOrder);
                 break;
-            case LOCATION_DIR:
+            }
+            case CATEGORY_PROCEEDINGS: {
+                String where = ProceedingsContract.CategoryEntry.COLUMN_CODE + " = ?";
+                String categoryCode = ProceedingsContract.CategoryEntry.getCategoryFromUri(uri);
+                String[] whereArgs = {categoryCode};
+                cursor = sCategoryProceedingsQueryBuilder.query(db, projection, where, whereArgs, null, null, sortOrder);
+                break;
+            }
+            case LOCATION_DIR: {
                 cursor = db.query(ProceedingsContract.LocationEntry.TABLE_NAME, projection,
                         selection, selectionArgs, null, null, sortOrder);
                 break;
-            case LOCATION_ITEM:
+            }
+            case LOCATION_ITEM: {
                 cursor = db.query(ProceedingsContract.LocationEntry.TABLE_NAME, projection,
                         selection, selectionArgs, null, null, sortOrder);
                 break;
+            }
             default:
                 throw new UnsupportedOperationException("Not yet implemented");
         }

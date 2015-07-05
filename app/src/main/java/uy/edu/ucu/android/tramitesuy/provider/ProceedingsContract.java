@@ -89,6 +89,14 @@ public class ProceedingsContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
+        public static Uri buildCategoryProceedingsUri(String categoryCode) {
+            return CONTENT_URI.buildUpon().appendPath(categoryCode).appendPath(PATH_PROCEEDING).build();
+        }
+
+        public static String getCategoryFromUri(Uri uri) {
+            return uri.getPathSegments().get(1);
+        }
+
     }
 
     // location path

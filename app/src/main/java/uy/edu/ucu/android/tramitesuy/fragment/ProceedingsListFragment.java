@@ -1,18 +1,21 @@
 package uy.edu.ucu.android.tramitesuy.fragment;
 
 import android.app.Activity;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
+import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -20,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import uy.edu.ucu.android.parser.model.Category;
+import uy.edu.ucu.android.parser.model.Dependence;
 import uy.edu.ucu.android.parser.model.Proceeding;
 import uy.edu.ucu.android.tramitesuy.R;
 import uy.edu.ucu.android.tramitesuy.provider.ProceedingsContract;
@@ -30,15 +34,19 @@ import uy.edu.ucu.android.tramitesuy.provider.ProceedingsContract;
 public class ProceedingsListFragment extends Fragment {
 
     private static final int CATEGORIES_LOADER = 0;
+    private static final int PROCEEDINGS_LOADER = 1;
 
     private OnFragmentInteractionListener mListener;
 
     private SearchView mSearchView;
-    private Spinner mSpinner;
+    private Spinner mCategoriesSpinner;
+    private ListView mProceedingsListView;
+    private CategoryAdapter mCategoryAdapter;
+    private ProceedingAdapter mProceedingAdapter;
 
-    private List<Category> mCategories;
     private Category mSelectedCategory;
     private String mSearchCriteria;
+
 
     private final LoaderManager.LoaderCallbacks mCategoriesLoaderCallbacks = new LoaderManager.LoaderCallbacks<Cursor>() {
         @Override
@@ -54,15 +62,15 @@ public class ProceedingsListFragment extends Fragment {
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             if (data != null) {
-                mCategories = new ArrayList<>();
+                List<Category> categories = new ArrayList<>();
                 Category category;
                 while (data.moveToNext()) {
                     category = new Category();
                     category.setName(data.getString(data.getColumnIndex(ProceedingsContract.CategoryEntry.COLUMN_NAME)));
                     category.setCode(data.getString(data.getColumnIndex(ProceedingsContract.CategoryEntry.COLUMN_CODE)));
-                    mCategories.add(category);
+                    categories.add(category);
                 }
-                mSpinner.setAdapter(new CategoryAdapter(mCategories));
+                mCategoryAdapter.setCategoriesData(categories);
             }
         }
 
@@ -79,16 +87,14 @@ public class ProceedingsListFragment extends Fragment {
             String[] selectionArgs;
             String selection;
             if (mSelectedCategory != null) {
-                 selection = ProceedingsContract.ProceedingEntry.COLUMN_CAT_KEY + " = ?";
-                 selectionArgs = new String[]{mSelectedCategory.getCode()};
                 loader = new CursorLoader(getActivity(),
-                        ProceedingsContract.ProceedingEntry.CONTENT_URI,
+                        ProceedingsContract.CategoryEntry.buildCategoryProceedingsUri(mSelectedCategory.getCode()),
                         null,
-                        selection,
-                        selectionArgs,
+                        null,
+                        null,
                         null);
             } else {
-                selectionArgs =new String[]{mSearchCriteria,mSearchCriteria};
+                selectionArgs = new String[]{mSearchCriteria, mSearchCriteria};
                 selection = ProceedingsContract.ProceedingEntry.COLUMN_DEPENDS_ON + " = ? OR" +
                         ProceedingsContract.ProceedingEntry.COLUMN_TITLE + "= ?";
                 loader = new CursorLoader(getActivity(),
@@ -105,15 +111,21 @@ public class ProceedingsListFragment extends Fragment {
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             if (data != null) {
-                mCategories = new ArrayList<>();
-                Category category;
+                List<Proceeding> proceedings = new ArrayList<>();
+                Proceeding proceeding;
                 while (data.moveToNext()) {
-                    category = new Category();
-                    category.setName(data.getString(data.getColumnIndex(ProceedingsContract.CategoryEntry.COLUMN_NAME)));
-                    category.setCode(data.getString(data.getColumnIndex(ProceedingsContract.CategoryEntry.COLUMN_CODE)));
-                    mCategories.add(category);
+                    proceeding = new Proceeding();
+                    String title = data.getString(data.getColumnIndex(ProceedingsContract.ProceedingEntry.COLUMN_TITLE));
+                    proceeding.setTitle(title);
+                    String description = data.getString(data.getColumnIndex(ProceedingsContract.ProceedingEntry.COLUMN_DESCRIPTION));
+                    proceeding.setDescription(description);
+                    Dependence dependence = new Dependence();
+                    String dependsOn = data.getString(data.getColumnIndex(ProceedingsContract.ProceedingEntry.COLUMN_DEPENDS_ON));
+                    dependence.setOrganization(dependsOn);
+                    proceeding.setDependence(dependence);
+                    proceedings.add(proceeding);
                 }
-                mSpinner.setAdapter(new CategoryAdapter(mCategories));
+                mProceedingAdapter.setProceedingData(proceedings);
             }
         }
 
@@ -124,19 +136,12 @@ public class ProceedingsListFragment extends Fragment {
     };
 
 
-
     public static ProceedingsListFragment newInstance() {
-        /*
-        Bundle args = new Bundle();
-        args.put...(TAG, value);
-        Fragment f = new Fragment();
-        f.setArguments(args);
-        return f;
-         */
         return new ProceedingsListFragment();
     }
 
-    public ProceedingsListFragment() {}
+    public ProceedingsListFragment() {
+    }
 
     public interface OnFragmentInteractionListener {
         void setTitle(String title);
@@ -166,21 +171,35 @@ public class ProceedingsListFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        mSearchView = (SearchView) view.findViewById(R.id.search);
-        mSpinner = (Spinner) view.findViewById(R.id.spinner);
+        mCategoriesSpinner = (Spinner) view.findViewById(R.id.categories_spinner);
+        mCategoriesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mSelectedCategory = (Category) parent.getItemAtPosition(position);
+                if (getLoaderManager().getLoader(PROCEEDINGS_LOADER) == null) {
+                    getLoaderManager().initLoader(PROCEEDINGS_LOADER, null, mProceedingsLoaderCallbacks);
+                } else {
+                    getLoaderManager().restartLoader(PROCEEDINGS_LOADER, null, mProceedingsLoaderCallbacks);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                mSelectedCategory = null;
+            }
+        });
+        mCategoryAdapter = new CategoryAdapter(new ArrayList<Category>());
+        mCategoriesSpinner.setAdapter(mCategoryAdapter);
+        mProceedingsListView = (ListView) view.findViewById(R.id.proceedings_list_view);
+        mProceedingAdapter = new ProceedingAdapter(new ArrayList<Proceeding>());
+        mProceedingsListView.setAdapter(mProceedingAdapter);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mListener.setTitle("TramitesUY");
-        /*
-        if (getArguments() != null) {
-            value = getArguments().get...(TAG);
-        }
-         */
         getLoaderManager().initLoader(CATEGORIES_LOADER, null, mCategoriesLoaderCallbacks);
-
     }
 
     @Override
@@ -189,14 +208,23 @@ public class ProceedingsListFragment extends Fragment {
         mListener = null;
     }
 
-    public class CategoryAdapter extends ArrayAdapter<Category>{
+    private class CategoryAdapter extends ArrayAdapter<Category> {
+
+        private List<Category> mCategories;
 
         public CategoryAdapter(List<Category> categories) {
-            super(getActivity(), -1, categories);
+            super(getActivity(), -1);
+            mCategories = categories;
         }
 
-        public View getCustomView(int position, View convertView, ViewGroup parent){
-            if(convertView == null){
+        public void setCategoriesData(List<Category> categories){
+            mCategories.clear();
+            mCategories.addAll(categories);
+            notifyDataSetChanged();
+        }
+
+        public View getCustomView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.category_item, null);
             }
             TextView categoryName = (TextView) convertView.findViewById(R.id.category_name);
@@ -205,8 +233,18 @@ public class ProceedingsListFragment extends Fragment {
         }
 
         @Override
+        public int getCount() {
+            return mCategories.size();
+        }
+
+        @Override
+        public Category getItem(int position) {
+            return mCategories.get(position);
+        }
+
+        @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            return getCustomView(position,convertView,parent);
+            return getCustomView(position, convertView, parent);
         }
 
         @Override
@@ -214,5 +252,47 @@ public class ProceedingsListFragment extends Fragment {
             return getCustomView(position, convertView, parent);
         }
     }
+
+    private class ProceedingAdapter extends ArrayAdapter<Proceeding> {
+
+        private List<Proceeding> mProceedings;
+
+        public ProceedingAdapter(List<Proceeding> proceedings) {
+            super(getActivity(), -1);
+            mProceedings = proceedings;
+        }
+
+        public void setProceedingData(List<Proceeding> proceedings) {
+            mProceedings.clear();
+            mProceedings.addAll(proceedings);
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public int getCount() {
+            return mProceedings.size();
+        }
+
+        @Override
+        public Proceeding getItem(int position) {
+            return mProceedings.get(position);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = getActivity().getLayoutInflater().inflate(R.layout.proceedings_list_item, null);
+            }
+            Proceeding proceeding = getItem(position);
+            TextView title = (TextView) convertView.findViewById(R.id.proceeding_title);
+            TextView description = (TextView) convertView.findViewById(R.id.proceeding_description);
+            TextView responsibleBody = (TextView) convertView.findViewById(R.id.proceeding_responsible_body);
+            title.setText(proceeding.getTitle());
+            description.setText(proceeding.getDescription());
+            responsibleBody.setText(proceeding.getDependence().getOrganization());
+            return convertView;
+        }
+    }
+
 
 }
