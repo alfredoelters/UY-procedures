@@ -75,7 +75,7 @@
     <style name="AppTheme.header">
         <item name="android:textColor">@color/mustard</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:background">@drawable/rounded_rectangle_right</item>
+        <item name="android:background">@drawable/rounded_rectangle</item>
         <item name="android:paddingLeft">16dp</item>
         <item name="android:layout_marginRight">5dp</item>
         <item name="android:layout_marginLeft">5dp</item>
