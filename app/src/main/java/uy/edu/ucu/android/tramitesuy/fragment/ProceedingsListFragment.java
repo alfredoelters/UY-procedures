@@ -33,6 +33,9 @@ import uy.edu.ucu.android.tramitesuy.provider.ProceedingsContract;
  */
 public class ProceedingsListFragment extends Fragment {
 
+
+    private static final String TAG = ProceedingsListFragment.class.getSimpleName();
+    private static final String SPINNER_POSITION = "spinner_position";
     private static final int CATEGORIES_LOADER = 0;
     private static final int PROCEEDINGS_LOADER = 1;
 
@@ -46,6 +49,8 @@ public class ProceedingsListFragment extends Fragment {
 
     private Category mSelectedCategory;
     private String mSearchCriteria;
+    private int mSpinnerSelectedItemPosition;
+
 
 
     private final LoaderManager.LoaderCallbacks mCategoriesLoaderCallbacks = new LoaderManager.LoaderCallbacks<Cursor>() {
@@ -71,6 +76,7 @@ public class ProceedingsListFragment extends Fragment {
                     categories.add(category);
                 }
                 mCategoryAdapter.setCategoriesData(categories);
+                mCategoriesSpinner.setSelection(mSpinnerSelectedItemPosition);
             }
         }
 
@@ -115,7 +121,7 @@ public class ProceedingsListFragment extends Fragment {
                 Proceeding proceeding;
                 while (data.moveToNext()) {
                     proceeding = new Proceeding();
-                    proceeding.setId(data.getString(data.getColumnIndex(ProceedingsContract.ProceedingEntry._ID)));
+                    proceeding.setId(String.valueOf(data.getLong(data.getColumnIndex(ProceedingsContract.ProceedingEntry._ID))));
                     String title = data.getString(data.getColumnIndex(ProceedingsContract.ProceedingEntry.COLUMN_TITLE));
                     proceeding.setTitle(title);
                     String description = data.getString(data.getColumnIndex(ProceedingsContract.ProceedingEntry.COLUMN_DESCRIPTION));
@@ -195,12 +201,22 @@ public class ProceedingsListFragment extends Fragment {
         mProceedingsListView = (ListView) view.findViewById(R.id.proceedings_list_view);
         mProceedingAdapter = new ProceedingAdapter(new ArrayList<Proceeding>());
         mProceedingsListView.setAdapter(mProceedingAdapter);
+        mProceedingsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                mListener.goToProceedingDetailsFragment(
+                        Long.parseLong(((Proceeding)parent.getItemAtPosition(position)).getId()));
+            }
+        });
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mListener.setTitle("TramitesUY");
+        if (savedInstanceState != null) {
+            mSpinnerSelectedItemPosition = savedInstanceState.getInt(SPINNER_POSITION);
+        }
         getLoaderManager().initLoader(CATEGORIES_LOADER, null, mCategoriesLoaderCallbacks);
     }
 
@@ -211,8 +227,20 @@ public class ProceedingsListFragment extends Fragment {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (getLoaderManager().getLoader(CATEGORIES_LOADER) != null) {
+            getLoaderManager().destroyLoader(CATEGORIES_LOADER);
+        }
+        if (getLoaderManager().getLoader(PROCEEDINGS_LOADER) != null) {
+            getLoaderManager().destroyLoader(PROCEEDINGS_LOADER);
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putInt(SPINNER_POSITION, mCategoriesSpinner.getSelectedItemPosition());
     }
 
     private class CategoryAdapter extends ArrayAdapter<Category> {
@@ -297,12 +325,6 @@ public class ProceedingsListFragment extends Fragment {
             title.setText(proceeding.getTitle());
             description.setText(proceeding.getDescription());
             responsibleBody.setText(proceeding.getDependence().getOrganization());
-            convertView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mListener.goToProceedingDetailsFragment(Long.parseLong(getItem(position).getId()));
-                }
-            });
             return convertView;
         }
     }
