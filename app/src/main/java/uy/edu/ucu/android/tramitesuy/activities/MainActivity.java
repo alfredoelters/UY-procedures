@@ -3,7 +3,6 @@ package uy.edu.ucu.android.tramitesuy.activities;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -17,6 +16,7 @@ import android.widget.TextView;
 
 import uy.edu.ucu.android.tramitesuy.R;
 import uy.edu.ucu.android.tramitesuy.fragment.ProceedingDetailsFragment;
+import uy.edu.ucu.android.tramitesuy.fragment.ProceedingTabsFragment;
 import uy.edu.ucu.android.tramitesuy.fragment.ProceedingsListFragment;
 import uy.edu.ucu.android.tramitesuy.receivers.LoadFinishedBroadcastReceiver;
 
@@ -62,9 +62,7 @@ public class MainActivity extends AppCompatActivity implements ProceedingsListFr
                 boolean result;
                 switch (menuItem.getItemId()){
                     case R.id.actionTest:
-                        getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.container, ProceedingDetailsFragment.newInstance())
-                                .addToBackStack(null).commit();
+
                         result = true;
                         break;
                     default:
@@ -137,5 +135,12 @@ public class MainActivity extends AppCompatActivity implements ProceedingsListFr
     public void setTitle(String title) {
         TextView toolbarTextView = (TextView) findViewById(R.id.toolbar_title);
         toolbarTextView.setText(title);
+    }
+
+    @Override
+    public void goToProceedingDetailsFragment(long proceedingId) {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.container, ProceedingTabsFragment.newInstance(proceedingId))
+                .addToBackStack(null).commit();
     }
 }

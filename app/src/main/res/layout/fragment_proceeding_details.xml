@@ -1,91 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:background="@android:color/white" xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <TextView
-        style="@style/AppTheme.header"
-        android:text="@string/proceeding_description"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:id="@+id/proceeding_description"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        style="@style/AppTheme.header"
-        android:text="@string/proceeding_dependence"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:id="@+id/proceeding_dependence"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
 
     <LinearLayout
-        android:id="@+id/proceeding_when_and_where_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"
         android:orientation="vertical">
 
         <TextView
             style="@style/AppTheme.header"
-            android:text="@string/proceeding_when_and_where"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/proceeding_description" />
+
+        <TextView
+            android:id="@+id/proceeding_description"
+            style="@style/AppTheme.sectionText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <TextView
-            android:id="@+id/proceeding_when_and_where"
+            style="@style/AppTheme.header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/proceeding_dependence" />
+
+        <TextView
+            android:id="@+id/proceeding_dependence"
+            style="@style/AppTheme.sectionText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <LinearLayout
+            android:id="@+id/proceeding_when_and_where_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/AppTheme.header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/proceeding_when_and_where" />
+
+            <TextView
+                android:id="@+id/proceeding_when_and_where"
+                style="@style/AppTheme.sectionText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <TextView
+            style="@style/AppTheme.header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/proceeding_requirements" />
+
+        <TextView
+            android:id="@+id/proceeding_requirements"
+            style="@style/AppTheme.sectionText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+
+        <TextView
+            style="@style/AppTheme.header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/proceeding_url" />
+
+        <TextView
+            android:id="@+id/proceeding_url"
+            style="@style/AppTheme.links"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            style="@style/AppTheme.header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/proceeding_status" />
+
+        <TextView
+            android:id="@+id/proceeding_status"
+            style="@style/AppTheme.sectionText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            style="@style/AppTheme.header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/proceeding_category" />
+
+        <TextView
+            android:id="@+id/proceeding_category"
+            style="@style/AppTheme.sectionText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
     </LinearLayout>
-
-    <TextView
-        style="@style/AppTheme.header"
-        android:text="@string/proceeding_requirements"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:id="@+id/proceeding_requirements"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-
-    <TextView
-        style="@style/AppTheme.header"
-        android:text="@string/proceeding_url"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        style="@style/AppTheme.links"
-        android:id="@+id/proceeding_url"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        style="@style/AppTheme.header"
-        android:text="@string/proceeding_status"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:id="@+id/proceeding_status"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        style="@style/AppTheme.header"
-        android:text="@string/proceeding_category"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:id="@+id/proceeding_category"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-</LinearLayout>
+</ScrollView>

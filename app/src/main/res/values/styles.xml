@@ -2,19 +2,19 @@
 
     <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
 
-        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimary">@color/primary_dark</item>
 
         <!--   darker variant for the status bar and contextual app bars -->
         <item name="colorPrimaryDark">@color/primary_darker</item>
 
         <!--   theme UI controls like checkboxes and text fields e.g. FloatActionButton -->
-        <item name="colorAccent">@color/accent</item>
+        <item name="colorAccent">@color/primary</item>
 
         <!-- Title Text Color -->
-        <item name="android:textColorPrimary">@color/accent</item>
+        <item name="android:textColorPrimary">@color/mustard</item>
 
         <!-- color of the menu overflow icon (three vertical dots) -->
-        <item name="android:textColorSecondary">@color/primary_dark</item>
+        <item name="android:textColorSecondary">@color/primary</item>
 
         <item name="android:textColorHint">@color/primary_dark</item>
 
@@ -69,15 +69,21 @@
 
     <style name="AppTheme.links">
         <item name="android:textColor">@color/accent</item>
+        <item name="android:paddingLeft">16dp</item>
     </style>
 
     <style name="AppTheme.header">
         <item name="android:textColor">@color/mustard</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:background">@color/primary_darker</item>
+        <item name="android:background">@drawable/rounded_rectangle_right</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:layout_marginRight">5dp</item>
+        <item name="android:layout_marginLeft">5dp</item>
     </style>
 
-
-
-
+    <style name="AppTheme.sectionText">
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingBottom">5dp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
 </resources>

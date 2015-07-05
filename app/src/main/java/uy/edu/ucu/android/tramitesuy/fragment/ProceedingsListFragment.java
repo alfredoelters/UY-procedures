@@ -10,7 +10,6 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,7 +56,6 @@ public class ProceedingsListFragment extends Fragment {
     private final LoaderManager.LoaderCallbacks mCategoriesLoaderCallbacks = new LoaderManager.LoaderCallbacks<Cursor>() {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-            Log.i(TAG, "onCreateLoader categories");
             return new CursorLoader(getActivity(),
                     ProceedingsContract.CategoryEntry.CONTENT_URI,
                     null,
@@ -68,7 +66,6 @@ public class ProceedingsListFragment extends Fragment {
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            Log.i(TAG, "onLoadFinished categories");
             if (data != null) {
                 List<Category> categories = new ArrayList<>();
                 Category category;
@@ -85,14 +82,13 @@ public class ProceedingsListFragment extends Fragment {
 
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
-            Log.i(TAG, "onLoaderReset categories");
+
         }
     };
 
     private final LoaderManager.LoaderCallbacks mProceedingsLoaderCallbacks = new LoaderManager.LoaderCallbacks<Cursor>() {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-            Log.i(TAG, "onCreateLoader proceedings");
             CursorLoader loader;
             String[] selectionArgs;
             String selection;
@@ -120,12 +116,12 @@ public class ProceedingsListFragment extends Fragment {
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            Log.i(TAG, "onLoadFinished proceedings");
             if (data != null) {
                 List<Proceeding> proceedings = new ArrayList<>();
                 Proceeding proceeding;
                 while (data.moveToNext()) {
                     proceeding = new Proceeding();
+                    proceeding.setId(data.getString(data.getColumnIndex(ProceedingsContract.ProceedingEntry._ID)));
                     String title = data.getString(data.getColumnIndex(ProceedingsContract.ProceedingEntry.COLUMN_TITLE));
                     proceeding.setTitle(title);
                     String description = data.getString(data.getColumnIndex(ProceedingsContract.ProceedingEntry.COLUMN_DESCRIPTION));
@@ -142,7 +138,7 @@ public class ProceedingsListFragment extends Fragment {
 
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
-            Log.i(TAG, "onLoaderReset proceedings");
+
         }
     };
 
@@ -156,6 +152,7 @@ public class ProceedingsListFragment extends Fragment {
 
     public interface OnFragmentInteractionListener {
         void setTitle(String title);
+        void goToProceedingDetailsFragment(long proceedingId);
     }
 
     @Override
@@ -310,7 +307,7 @@ public class ProceedingsListFragment extends Fragment {
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 convertView = getActivity().getLayoutInflater().inflate(R.layout.proceedings_list_item, null);
             }
@@ -321,6 +318,12 @@ public class ProceedingsListFragment extends Fragment {
             title.setText(proceeding.getTitle());
             description.setText(proceeding.getDescription());
             responsibleBody.setText(proceeding.getDependence().getOrganization());
+            convertView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mListener.goToProceedingDetailsFragment(Long.parseLong(getItem(position).getId()));
+                }
+            });
             return convertView;
         }
     }

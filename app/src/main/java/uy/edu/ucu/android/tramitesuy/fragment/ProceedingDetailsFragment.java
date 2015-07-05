@@ -33,8 +33,9 @@ import uy.edu.ucu.android.tramitesuy.provider.ProceedingsContract;
  * Created by alfredo on 03/07/15.
  */
 public class ProceedingDetailsFragment extends Fragment {
+    private static final String KEY_PROCEEDING_ID = "proceedingId";
     private static final int PROCEEDING_LOADER = 0;
-    private long mDummyId = 4;
+    private long mProceedingId;
     private Proceeding mProceeding;
     private OnFragmentInteractionListener mListener;
 
@@ -53,17 +54,17 @@ public class ProceedingDetailsFragment extends Fragment {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             return new CursorLoader(getActivity(),
-                    ProceedingsContract.ProceedingEntry.buildProceedingUri(mDummyId),
+                    ProceedingsContract.ProceedingEntry.buildProceedingUri(mProceedingId),
                     null,
                     ProceedingsContract.ProceedingEntry.TABLE_NAME+"._id = ?",
-                    new String[]{String.valueOf(mDummyId)},
+                    new String[]{String.valueOf(mProceedingId)},
                     null);
         }
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             if (data != null && data.moveToNext()) {
-                mProceeding.setId(String.valueOf(mDummyId));
+                mProceeding.setId(String.valueOf(mProceedingId));
                 mProceeding.setTitle(data.getString(data.getColumnIndex(ProceedingsContract.ProceedingEntry.COLUMN_TITLE)));
                 mProceeding.setDescription(data.getString(data.getColumnIndex(ProceedingsContract.ProceedingEntry.COLUMN_DESCRIPTION)));
                 Dependence dependence = new Dependence();
@@ -111,15 +112,12 @@ public class ProceedingDetailsFragment extends Fragment {
         }
     };
 
-    public static ProceedingDetailsFragment newInstance() {
-        /*
+    public static ProceedingDetailsFragment newInstance(long proceedingId) {
         Bundle args = new Bundle();
-        args.put...(TAG, value);
-        Fragment f = new Fragment();
-        f.setArguments(args);
-        return f;
-         */
-        return new ProceedingDetailsFragment();
+        args.putLong(KEY_PROCEEDING_ID, proceedingId);
+        ProceedingDetailsFragment instance = new ProceedingDetailsFragment();
+        instance.setArguments(args);
+        return instance;
     }
 
     @Override
@@ -127,6 +125,7 @@ public class ProceedingDetailsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mProceeding = new Proceeding();
     }
+
 
     @Nullable
     @Override
@@ -149,6 +148,7 @@ public class ProceedingDetailsFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        mProceedingId = getArguments().getLong(KEY_PROCEEDING_ID);
         try {
             mListener = (OnFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
@@ -160,10 +160,23 @@ public class ProceedingDetailsFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null) {
+            mProceedingId = savedInstanceState.getLong(KEY_PROCEEDING_ID);
+        }
         getLoaderManager().initLoader(PROCEEDING_LOADER, null, mProceedingLoaderCallbacks);
 
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putLong(KEY_PROCEEDING_ID, mProceedingId);
+    }
 
     public interface OnFragmentInteractionListener {
         void setTitle(String title);
