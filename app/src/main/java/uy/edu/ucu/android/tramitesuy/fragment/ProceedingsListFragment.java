@@ -1,7 +1,6 @@
 package uy.edu.ucu.android.tramitesuy.fragment;
 
 import android.app.Activity;
-import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -47,6 +46,7 @@ public class ProceedingsListFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     private SearchView mSearchView;
+    private MenuItem mSearchMenuItem;
     private Spinner mCategoriesSpinner;
     private ListView mProceedingsListView;
     private CategoryAdapter mCategoryAdapter;
@@ -54,7 +54,7 @@ public class ProceedingsListFragment extends Fragment {
 
     private Category mSelectedCategory;
     private int mSpinnerSelectedItemPosition;
-
+    private String mSearchCriteria;
 
 
     private final LoaderManager.LoaderCallbacks mCategoriesLoaderCallbacks = new LoaderManager.LoaderCallbacks<Cursor>() {
@@ -104,7 +104,7 @@ public class ProceedingsListFragment extends Fragment {
                         null,
                         null);
             } else {
-                String searchCriteria = "%" + args.getString(EXTRA_SEARCH_CRITERIA) + "%";
+                String searchCriteria = "%" + mSearchCriteria + "%";
                 selection = ProceedingsContract.ProceedingEntry.COLUMN_DEPENDS_ON + " LIKE ? OR " +
                         ProceedingsContract.ProceedingEntry.COLUMN_TITLE + " LIKE ?";
                 selectionArgs = new String[]{searchCriteria, searchCriteria};
@@ -157,6 +157,7 @@ public class ProceedingsListFragment extends Fragment {
 
     public interface OnFragmentInteractionListener {
         void setTitle(String title);
+
         void goToProceedingDetailsFragment(long proceedingId);
     }
 
@@ -211,7 +212,7 @@ public class ProceedingsListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mListener.goToProceedingDetailsFragment(
-                        Long.parseLong(((Proceeding)parent.getItemAtPosition(position)).getId()));
+                        Long.parseLong(((Proceeding) parent.getItemAtPosition(position)).getId()));
             }
         });
     }
@@ -222,6 +223,7 @@ public class ProceedingsListFragment extends Fragment {
         mListener.setTitle(getString(R.string.app_name));
         if (savedInstanceState != null) {
             mSpinnerSelectedItemPosition = savedInstanceState.getInt(SPINNER_POSITION);
+            mSearchCriteria = savedInstanceState.getString(EXTRA_SEARCH_CRITERIA);
         }
         getLoaderManager().initLoader(CATEGORIES_LOADER, null, mCategoriesLoaderCallbacks);
     }
@@ -256,26 +258,20 @@ public class ProceedingsListFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        getLoaderManager().restartLoader(CATEGORIES_LOADER, null, mCategoriesLoaderCallbacks);
-    }
-
-    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_home, menu);
-        mSearchView = (SearchView) menu.findItem(R.id.search_proceeding_action).getActionView();
+        mSearchMenuItem = menu.findItem(R.id.search_proceeding_action);
+        mSearchView = (SearchView) MenuItemCompat.getActionView(mSearchMenuItem);
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 mSelectedCategory = null;
-                Bundle args = new Bundle();
-                args.putString(EXTRA_SEARCH_CRITERIA, query);
+                mSearchCriteria = query;
                 if (getLoaderManager().getLoader(PROCEEDINGS_LOADER) == null) {
-                    getLoaderManager().initLoader(PROCEEDINGS_LOADER, args, mProceedingsLoaderCallbacks);
+                    getLoaderManager().initLoader(PROCEEDINGS_LOADER, null, mProceedingsLoaderCallbacks);
                 } else {
-                    getLoaderManager().restartLoader(PROCEEDINGS_LOADER, args, mProceedingsLoaderCallbacks);
+                    getLoaderManager().restartLoader(PROCEEDINGS_LOADER, null, mProceedingsLoaderCallbacks);
                 }
                 return true;
             }
@@ -283,12 +279,11 @@ public class ProceedingsListFragment extends Fragment {
             @Override
             public boolean onQueryTextChange(String newText) {
                 mSelectedCategory = null;
-                Bundle args = new Bundle();
-                args.putString(EXTRA_SEARCH_CRITERIA, newText);
+                mSearchCriteria = newText;
                 if (getLoaderManager().getLoader(PROCEEDINGS_LOADER) == null) {
-                    getLoaderManager().initLoader(PROCEEDINGS_LOADER, args, mProceedingsLoaderCallbacks);
+                    getLoaderManager().initLoader(PROCEEDINGS_LOADER, null, mProceedingsLoaderCallbacks);
                 } else {
-                    getLoaderManager().restartLoader(PROCEEDINGS_LOADER, args, mProceedingsLoaderCallbacks);
+                    getLoaderManager().restartLoader(PROCEEDINGS_LOADER, null, mProceedingsLoaderCallbacks);
                 }
                 return true;
             }
@@ -298,8 +293,9 @@ public class ProceedingsListFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (mCategoriesSpinner != null){
+        if (mCategoriesSpinner != null) {
             outState.putInt(SPINNER_POSITION, mCategoriesSpinner.getSelectedItemPosition());
+            outState.putString(EXTRA_SEARCH_CRITERIA, mSearchCriteria);
         }
     }
 
@@ -312,7 +308,7 @@ public class ProceedingsListFragment extends Fragment {
             mCategories = categories;
         }
 
-        public void setCategoriesData(List<Category> categories){
+        public void setCategoriesData(List<Category> categories) {
             mCategories.clear();
             mCategories.addAll(categories);
             notifyDataSetChanged();
