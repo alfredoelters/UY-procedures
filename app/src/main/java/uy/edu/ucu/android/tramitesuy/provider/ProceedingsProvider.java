@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.text.TextUtils;
 
 import uy.edu.ucu.android.tramitesuy.data.ProceedingsOpenHelper;
 
@@ -18,12 +17,6 @@ import uy.edu.ucu.android.tramitesuy.data.ProceedingsOpenHelper;
  */
 public class ProceedingsProvider extends ContentProvider {
 
-    private static final String TAG = ProceedingsProvider.class.getSimpleName();
-
-    private static final UriMatcher mUriMatcher = buildUriMatcher();
-
-    private ProceedingsOpenHelper mOpenHelper;
-
     // TODO: For each type of URI you want to add, create a corresponding code.
     static final int PROCEEDING_DIR = 100;
     static final int PROCEEDING_ITEM = 101;
@@ -32,12 +25,17 @@ public class ProceedingsProvider extends ContentProvider {
     static final int CATEGORY_PROCEEDINGS = 302;
     static final int LOCATION_DIR = 400;
     static final int LOCATION_ITEM = 401;
+    private static final String TAG = ProceedingsProvider.class.getSimpleName();
+    private static final UriMatcher mUriMatcher = buildUriMatcher();
+    private ProceedingsOpenHelper mOpenHelper;
 
 
-    public ProceedingsProvider() {}
+    public ProceedingsProvider() {
+    }
 
     /**
      * Builds the URI matcher specifying the Authority, Path and integer to return when matched
+     *
      * @return UriMatcher
      */
     private static UriMatcher buildUriMatcher() {
@@ -72,6 +70,7 @@ public class ProceedingsProvider extends ContentProvider {
     /**
      * Gets the MIME types for the different URIs the Content Provider supports
      * Uses the Uri Matcher to determine what kind of URI this is.
+     *
      * @param uri uri to match with
      * @return MIME type as defined in the Contract class
      */
@@ -101,6 +100,7 @@ public class ProceedingsProvider extends ContentProvider {
 
     /**
      * Called when the provider is instantiated. You must not do heavy initializations here
+     *
      * @return boolean indicating if the provider initialized correctly or not
      */
     @Override
@@ -112,11 +112,12 @@ public class ProceedingsProvider extends ContentProvider {
 
     /**
      * Determines table to be queried based on the uri passed
-     * @param uri to determine which query to execute
-     * @param projection query columns projection
-     * @param selection selection criteria (where clause)
+     *
+     * @param uri           to determine which query to execute
+     * @param projection    query columns projection
+     * @param selection     selection criteria (where clause)
      * @param selectionArgs selection parameters
-     * @param sortOrder order by clause
+     * @param sortOrder     order by clause
      * @return
      */
     @Override
@@ -124,6 +125,7 @@ public class ProceedingsProvider extends ContentProvider {
                         String[] selectionArgs, String sortOrder) {
         //TODO: implementar las queries que sean necesarias en su app de acuerdo a lo visto en clase
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
+        SQLiteQueryBuilder mQueryBuilder = new SQLiteQueryBuilder();
         Cursor cursor;
         switch (mUriMatcher.match(uri)){
             case PROCEEDING_DIR: {
@@ -132,7 +134,14 @@ public class ProceedingsProvider extends ContentProvider {
                 break;
             }
             case PROCEEDING_ITEM: {
-                cursor = db.query(ProceedingsContract.ProceedingEntry.TABLE_NAME, projection,
+                mQueryBuilder.setTables(
+                        ProceedingsContract.ProceedingEntry.TABLE_NAME + " LEFT JOIN " +
+                                ProceedingsContract.CategoryEntry.TABLE_NAME
+                                + " ON " + ProceedingsContract.ProceedingEntry.TABLE_NAME + "."
+                                + ProceedingsContract.ProceedingEntry.COLUMN_CAT_KEY
+                                + " = " + ProceedingsContract.CategoryEntry.TABLE_NAME + "."
+                                + ProceedingsContract.CategoryEntry._ID);
+                cursor = mQueryBuilder.query(db, projection,
                         selection, selectionArgs, null, null, sortOrder);
                 break;
             }
@@ -176,9 +185,10 @@ public class ProceedingsProvider extends ContentProvider {
 
     /**
      * Updates rows of a table based on the Uri and selection criteria provided
-     * @param uri uri used to match and determine table to update rows from
-     * @param values values to update records with
-     * @param selection selection criteria (where clause)
+     *
+     * @param uri           uri used to match and determine table to update rows from
+     * @param values        values to update records with
+     * @param selection     selection criteria (where clause)
      * @param selectionArgs selection parameters
      * @return number of rows updated
      */
@@ -191,8 +201,9 @@ public class ProceedingsProvider extends ContentProvider {
 
     /**
      * Deletes rows of a table based on the Uri and selection criteria provided
-     * @param uri uri used to match and determine table to delete rows from
-     * @param selection selection criteria (where clause)
+     *
+     * @param uri           uri used to match and determine table to delete rows from
+     * @param selection     selection criteria (where clause)
      * @param selectionArgs selection parameters
      * @return number of rows deleted
      */
@@ -200,7 +211,7 @@ public class ProceedingsProvider extends ContentProvider {
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         String table;
-        switch (mUriMatcher.match(uri)){
+        switch (mUriMatcher.match(uri)) {
             case PROCEEDING_DIR:
             case PROCEEDING_ITEM:
                 table = ProceedingsContract.ProceedingEntry.TABLE_NAME;
@@ -224,7 +235,8 @@ public class ProceedingsProvider extends ContentProvider {
 
     /**
      * Inserts rows in a table based on the Uri provided
-     * @param uri to match and determine table
+     *
+     * @param uri    to match and determine table
      * @param values to insert
      * @return number of rows inserted
      */
@@ -233,7 +245,7 @@ public class ProceedingsProvider extends ContentProvider {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = mUriMatcher.match(uri);
         Uri returnUri;
-        switch (match){
+        switch (match) {
             case CATEGORY_DIR: {
                 long _id = db.insert(ProceedingsContract.CategoryEntry.TABLE_NAME, null, values);
                 if (_id > 0)
@@ -271,7 +283,8 @@ public class ProceedingsProvider extends ContentProvider {
      * Inserta registros en una misma transaccion para optimizar la carga de datos
      * IMPORTANTE! Este metodo no es utilizado, y no deberian tener que utilizarlo.
      * Esta aqui para que les quede de ejemplo como insertar registros en bulk en una misma transaccion como una optimizacion posible.
-     * @param uri to match and determine table
+     *
+     * @param uri    to match and determine table
      * @param values to insert
      * @return number of rows inserted
      */
