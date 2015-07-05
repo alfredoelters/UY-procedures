@@ -9,8 +9,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -36,6 +40,7 @@ public class ProceedingsListFragment extends Fragment {
 
     private static final String TAG = ProceedingsListFragment.class.getSimpleName();
     private static final String SPINNER_POSITION = "spinner_position";
+    private static final String EXTRA_SEARCH_CRITERIA = "search_criteria";
     private static final int CATEGORIES_LOADER = 0;
     private static final int PROCEEDINGS_LOADER = 1;
 
@@ -48,7 +53,6 @@ public class ProceedingsListFragment extends Fragment {
     private ProceedingAdapter mProceedingAdapter;
 
     private Category mSelectedCategory;
-    private String mSearchCriteria;
     private int mSpinnerSelectedItemPosition;
 
 
@@ -100,9 +104,10 @@ public class ProceedingsListFragment extends Fragment {
                         null,
                         null);
             } else {
-                selectionArgs = new String[]{mSearchCriteria, mSearchCriteria};
-                selection = ProceedingsContract.ProceedingEntry.COLUMN_DEPENDS_ON + " = ? OR" +
-                        ProceedingsContract.ProceedingEntry.COLUMN_TITLE + "= ?";
+                String searchCriteria = "%" + args.getString(EXTRA_SEARCH_CRITERIA) + "%";
+                selection = ProceedingsContract.ProceedingEntry.COLUMN_DEPENDS_ON + " LIKE ? OR " +
+                        ProceedingsContract.ProceedingEntry.COLUMN_TITLE + " LIKE ?";
+                selectionArgs = new String[]{searchCriteria, searchCriteria};
                 loader = new CursorLoader(getActivity(),
                         ProceedingsContract.ProceedingEntry.CONTENT_URI,
                         null,
@@ -169,6 +174,7 @@ public class ProceedingsListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Nullable
@@ -235,6 +241,46 @@ public class ProceedingsListFragment extends Fragment {
         if (getLoaderManager().getLoader(PROCEEDINGS_LOADER) != null) {
             getLoaderManager().destroyLoader(PROCEEDINGS_LOADER);
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getLoaderManager().restartLoader(CATEGORIES_LOADER, null, mCategoriesLoaderCallbacks);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_home, menu);
+        mSearchView = (SearchView) menu.findItem(R.id.search_proceeding_action).getActionView();
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                mSelectedCategory = null;
+                Bundle args = new Bundle();
+                args.putString(EXTRA_SEARCH_CRITERIA, query);
+                if (getLoaderManager().getLoader(PROCEEDINGS_LOADER) == null) {
+                    getLoaderManager().initLoader(PROCEEDINGS_LOADER, args, mProceedingsLoaderCallbacks);
+                } else {
+                    getLoaderManager().restartLoader(PROCEEDINGS_LOADER, args, mProceedingsLoaderCallbacks);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                mSelectedCategory = null;
+                Bundle args = new Bundle();
+                args.putString(EXTRA_SEARCH_CRITERIA, newText);
+                if (getLoaderManager().getLoader(PROCEEDINGS_LOADER) == null) {
+                    getLoaderManager().initLoader(PROCEEDINGS_LOADER, args, mProceedingsLoaderCallbacks);
+                } else {
+                    getLoaderManager().restartLoader(PROCEEDINGS_LOADER, args, mProceedingsLoaderCallbacks);
+                }
+                return true;
+            }
+        });
     }
 
     @Override
