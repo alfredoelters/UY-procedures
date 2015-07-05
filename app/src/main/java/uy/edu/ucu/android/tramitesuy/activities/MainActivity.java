@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements ProceedingsListFr
     private NavigationView mNavigationView;
     private ActionBarDrawerToggle mDrawerToggle;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

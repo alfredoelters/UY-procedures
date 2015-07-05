@@ -219,7 +219,7 @@ public class ProceedingsListFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mListener.setTitle("TramitesUY");
+        mListener.setTitle(getString(R.string.app_name));
         if (savedInstanceState != null) {
             mSpinnerSelectedItemPosition = savedInstanceState.getInt(SPINNER_POSITION);
         }
@@ -227,9 +227,21 @@ public class ProceedingsListFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        getLoaderManager().restartLoader(CATEGORIES_LOADER, null, mCategoriesLoaderCallbacks);
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mSpinnerSelectedItemPosition = mCategoriesSpinner.getSelectedItemPosition();
     }
 
     @Override
@@ -286,7 +298,9 @@ public class ProceedingsListFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(SPINNER_POSITION, mCategoriesSpinner.getSelectedItemPosition());
+        if (mCategoriesSpinner != null){
+            outState.putInt(SPINNER_POSITION, mCategoriesSpinner.getSelectedItemPosition());
+        }
     }
 
     private class CategoryAdapter extends ArrayAdapter<Category> {

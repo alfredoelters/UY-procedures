@@ -55,6 +55,10 @@ public class ProceedingsContract {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
+        public static Uri buildProceedingUriTitle(String title) {
+            return CONTENT_URI.buildUpon().appendPath(title).build();
+        }
+
 
         public static Uri buildProceedingCategory(long categoryId) {
             return ContentUris.withAppendedId(Uri.withAppendedPath(CONTENT_URI, PATH_CATEGORY), categoryId);

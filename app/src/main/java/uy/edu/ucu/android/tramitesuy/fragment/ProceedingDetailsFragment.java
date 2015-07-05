@@ -23,7 +23,6 @@ import java.util.List;
 
 import uy.edu.ucu.android.parser.model.Category;
 import uy.edu.ucu.android.parser.model.Dependence;
-import uy.edu.ucu.android.parser.model.Link;
 import uy.edu.ucu.android.parser.model.Proceeding;
 import uy.edu.ucu.android.parser.model.WhenAndWhere;
 import uy.edu.ucu.android.tramitesuy.R;
@@ -56,8 +55,8 @@ public class ProceedingDetailsFragment extends Fragment {
             return new CursorLoader(getActivity(),
                     ProceedingsContract.ProceedingEntry.buildProceedingUri(mProceedingId),
                     null,
-                    null,
-                    null,
+                    ProceedingsContract.ProceedingEntry.TABLE_NAME + "." + ProceedingsContract.ProceedingEntry._ID + " = ?",
+                    new String[]{String.valueOf(mProceedingId)},
                     null);
         }
 
@@ -79,12 +78,12 @@ public class ProceedingDetailsFragment extends Fragment {
                 categories.add(category);
                 mProceeding.setCategories(categories);
                 String whereAndWhereOtherData = data.getString(data.getColumnIndex(ProceedingsContract.ProceedingEntry.COLUMN_LOCATION_OTHER_DATA));
-                if(whereAndWhereOtherData!=null) {
+                if (whereAndWhereOtherData != null) {
                     WhenAndWhere whenAndWhere = new WhenAndWhere();
                     whenAndWhere.setOtherData(whereAndWhereOtherData);
                     mProceeding.setWhenAndWhere(whenAndWhere);
                     mWhenAndWhereTextView.setText(mProceeding.getWhenAndWhere().getOtherData());
-                }else{
+                } else {
                     mWhereAndWhereLinearLayout.setVisibility(View.GONE);
                 }
                 mListener.setTitle(mProceeding.getTitle());
@@ -140,7 +139,7 @@ public class ProceedingDetailsFragment extends Fragment {
         mDependenceTextView = (TextView) view.findViewById(R.id.proceeding_dependence);
         mWhenAndWhereTextView = (TextView) view.findViewById(R.id.proceeding_when_and_where);
         mUrlTextView = (TextView) view.findViewById(R.id.proceeding_url);
-        mStatusTextView= (TextView) view.findViewById(R.id.proceeding_status);
+        mStatusTextView = (TextView) view.findViewById(R.id.proceeding_status);
         mCategoryTextView = (TextView) view.findViewById(R.id.proceeding_category);
         mWhereAndWhereLinearLayout = (LinearLayout) view.findViewById(R.id.proceeding_when_and_where_layout);
     }
@@ -164,7 +163,6 @@ public class ProceedingDetailsFragment extends Fragment {
             mProceedingId = savedInstanceState.getLong(KEY_PROCEEDING_ID);
         }
         getLoaderManager().initLoader(PROCEEDING_LOADER, null, mProceedingLoaderCallbacks);
-
     }
 
     @Override
@@ -174,7 +172,16 @@ public class ProceedingDetailsFragment extends Fragment {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (getLoaderManager().getLoader(PROCEEDING_LOADER) != null) {
+            getLoaderManager().destroyLoader(PROCEEDING_LOADER);
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
         outState.putLong(KEY_PROCEEDING_ID, mProceedingId);
     }
 

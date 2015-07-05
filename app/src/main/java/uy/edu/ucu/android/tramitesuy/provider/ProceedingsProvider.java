@@ -24,7 +24,7 @@ public class ProceedingsProvider extends ContentProvider {
     static final int CATEGORY_ITEM = 301;
     static final int CATEGORY_PROCEEDINGS = 302;
     static final int LOCATION_DIR = 400;
-    static final int LOCATION_ITEM = 401;
+    static final int PROCEEDING_LOCATIONS = 401;
     private static final String TAG = ProceedingsProvider.class.getSimpleName();
     private static final UriMatcher mUriMatcher = buildUriMatcher();
     private ProceedingsOpenHelper mOpenHelper;
@@ -49,7 +49,7 @@ public class ProceedingsProvider extends ContentProvider {
         matcher.addURI(authority, ProceedingsContract.PATH_CATEGORY + "/#", CATEGORY_ITEM);
         matcher.addURI(authority, ProceedingsContract.PATH_CATEGORY + "/*/" + ProceedingsContract.PATH_PROCEEDING, CATEGORY_PROCEEDINGS);
         matcher.addURI(authority, ProceedingsContract.PATH_LOCATION, LOCATION_DIR);
-        matcher.addURI(authority, ProceedingsContract.PATH_LOCATION + "/#", LOCATION_ITEM);
+        matcher.addURI(authority, ProceedingsContract.PATH_LOCATION + "/#", PROCEEDING_LOCATIONS);
         //TODO: add missing matches for the new URIs and their respective code
 
         return matcher;
@@ -61,7 +61,7 @@ public class ProceedingsProvider extends ContentProvider {
     static{
         sCategoryProceedingsQueryBuilder = new SQLiteQueryBuilder();
         sCategoryProceedingsQueryBuilder.setTables(
-                ProceedingsContract.ProceedingEntry.TABLE_NAME + " LEFT OUTER JOIN " + ProceedingsContract.CategoryEntry.TABLE_NAME
+                ProceedingsContract.ProceedingEntry.TABLE_NAME + " LEFT JOIN " + ProceedingsContract.CategoryEntry.TABLE_NAME
                         + " ON " + ProceedingsContract.ProceedingEntry.TABLE_NAME + "." + ProceedingsContract.ProceedingEntry.COLUMN_CAT_KEY
                         + " = " + ProceedingsContract.CategoryEntry.TABLE_NAME + "." + ProceedingsContract.CategoryEntry._ID);
     }
@@ -86,8 +86,8 @@ public class ProceedingsProvider extends ContentProvider {
                 return ProceedingsContract.CategoryEntry.CONTENT_ITEM_TYPE;
             case LOCATION_DIR:
                 return ProceedingsContract.LocationEntry.CONTENT_TYPE;
-            case LOCATION_ITEM:
-                return ProceedingsContract.LocationEntry.CONTENT_ITEM_TYPE;
+            case PROCEEDING_LOCATIONS:
+                return ProceedingsContract.LocationEntry.CONTENT_TYPE;
             case PROCEEDING_DIR:
                 return ProceedingsContract.ProceedingEntry.CONTENT_TYPE;
             case PROCEEDING_ITEM:
@@ -123,7 +123,6 @@ public class ProceedingsProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
-        //TODO: implementar las queries que sean necesarias en su app de acuerdo a lo visto en clase
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         SQLiteQueryBuilder mQueryBuilder = new SQLiteQueryBuilder();
         Cursor cursor;
@@ -166,7 +165,8 @@ public class ProceedingsProvider extends ContentProvider {
                 String where = ProceedingsContract.CategoryEntry.COLUMN_CODE + " = ?";
                 String categoryCode = ProceedingsContract.CategoryEntry.getCategoryFromUri(uri);
                 String[] whereArgs = {categoryCode};
-                cursor = sCategoryProceedingsQueryBuilder.query(db, projection, where, whereArgs, null, null, sortOrder);
+                String[] select = {ProceedingsContract.ProceedingEntry.TABLE_NAME + ".*"};
+                cursor = sCategoryProceedingsQueryBuilder.query(db, select, where, whereArgs, null, null, sortOrder);
                 break;
             }
             case LOCATION_DIR: {
@@ -174,7 +174,7 @@ public class ProceedingsProvider extends ContentProvider {
                         selection, selectionArgs, null, null, sortOrder);
                 break;
             }
-            case LOCATION_ITEM: {
+            case PROCEEDING_LOCATIONS: {
                 cursor = db.query(ProceedingsContract.LocationEntry.TABLE_NAME, projection,
                         selection, selectionArgs, null, null, sortOrder);
                 break;
@@ -225,7 +225,7 @@ public class ProceedingsProvider extends ContentProvider {
                 table = ProceedingsContract.CategoryEntry.TABLE_NAME;
                 break;
             case LOCATION_DIR:
-            case LOCATION_ITEM:
+            case PROCEEDING_LOCATIONS:
                 table = ProceedingsContract.LocationEntry.TABLE_NAME;
                 break;
             default:
