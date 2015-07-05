@@ -7,6 +7,9 @@
     <string name="close_drawer_description">Cerrar</string>
     <string name="search_proceeding">Buscar</string>
 
+    <!--ProceedingTabs-->
+    <string name="details">Detalles</string>
+    <string name="map">Mapa</string>
     <!--ProceedingDetailsFragment-->
     <string name="proceeding_description">Descripción</string>
     <string name="proceeding_dependence">Dependencia</string>
