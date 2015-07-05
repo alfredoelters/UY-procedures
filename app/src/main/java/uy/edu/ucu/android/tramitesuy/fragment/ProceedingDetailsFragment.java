@@ -172,6 +172,14 @@ public class ProceedingDetailsFragment extends Fragment {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (getLoaderManager().getLoader(PROCEEDING_LOADER) != null) {
+            getLoaderManager().destroyLoader(PROCEEDING_LOADER);
+        }
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putLong(KEY_PROCEEDING_ID, mProceedingId);

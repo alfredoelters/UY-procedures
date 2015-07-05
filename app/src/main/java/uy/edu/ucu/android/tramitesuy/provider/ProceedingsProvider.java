@@ -61,7 +61,7 @@ public class ProceedingsProvider extends ContentProvider {
     static{
         sCategoryProceedingsQueryBuilder = new SQLiteQueryBuilder();
         sCategoryProceedingsQueryBuilder.setTables(
-                ProceedingsContract.ProceedingEntry.TABLE_NAME + " LEFT OUTER JOIN " + ProceedingsContract.CategoryEntry.TABLE_NAME
+                ProceedingsContract.ProceedingEntry.TABLE_NAME + " LEFT JOIN " + ProceedingsContract.CategoryEntry.TABLE_NAME
                         + " ON " + ProceedingsContract.ProceedingEntry.TABLE_NAME + "." + ProceedingsContract.ProceedingEntry.COLUMN_CAT_KEY
                         + " = " + ProceedingsContract.CategoryEntry.TABLE_NAME + "." + ProceedingsContract.CategoryEntry._ID);
     }
@@ -165,7 +165,8 @@ public class ProceedingsProvider extends ContentProvider {
                 String where = ProceedingsContract.CategoryEntry.COLUMN_CODE + " = ?";
                 String categoryCode = ProceedingsContract.CategoryEntry.getCategoryFromUri(uri);
                 String[] whereArgs = {categoryCode};
-                cursor = sCategoryProceedingsQueryBuilder.query(db, projection, where, whereArgs, null, null, sortOrder);
+                String[] select = {ProceedingsContract.ProceedingEntry.TABLE_NAME + ".*"};
+                cursor = sCategoryProceedingsQueryBuilder.query(db, select, where, whereArgs, null, null, sortOrder);
                 break;
             }
             case LOCATION_DIR: {
