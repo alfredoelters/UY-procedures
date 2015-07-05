@@ -141,8 +141,12 @@ public class ProceedingsProvider extends ContentProvider {
                                 + ProceedingsContract.ProceedingEntry.COLUMN_CAT_KEY
                                 + " = " + ProceedingsContract.CategoryEntry.TABLE_NAME + "."
                                 + ProceedingsContract.CategoryEntry._ID);
+                String where = ProceedingsContract.ProceedingEntry.TABLE_NAME + "." +
+                        ProceedingsContract.ProceedingEntry._ID + " = ?";
+                long proceedingId = ProceedingsContract.ProceedingEntry.getProceedingFromUri(uri);
+                String[] whereArgs = {String.valueOf(proceedingId)};
                 cursor = mQueryBuilder.query(db, projection,
-                        selection, selectionArgs, null, null, sortOrder);
+                        where, whereArgs, null, null, sortOrder);
                 break;
             }
             case CATEGORY_DIR: {

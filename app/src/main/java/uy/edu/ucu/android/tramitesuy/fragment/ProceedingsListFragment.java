@@ -121,7 +121,7 @@ public class ProceedingsListFragment extends Fragment {
                 Proceeding proceeding;
                 while (data.moveToNext()) {
                     proceeding = new Proceeding();
-                    proceeding.setId(data.getString(data.getColumnIndex(ProceedingsContract.ProceedingEntry._ID)));
+                    proceeding.setId(String.valueOf(data.getLong(data.getColumnIndex(ProceedingsContract.ProceedingEntry._ID))));
                     String title = data.getString(data.getColumnIndex(ProceedingsContract.ProceedingEntry.COLUMN_TITLE));
                     proceeding.setTitle(title);
                     String description = data.getString(data.getColumnIndex(ProceedingsContract.ProceedingEntry.COLUMN_DESCRIPTION));
@@ -201,6 +201,13 @@ public class ProceedingsListFragment extends Fragment {
         mProceedingsListView = (ListView) view.findViewById(R.id.proceedings_list_view);
         mProceedingAdapter = new ProceedingAdapter(new ArrayList<Proceeding>());
         mProceedingsListView.setAdapter(mProceedingAdapter);
+        mProceedingsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                mListener.goToProceedingDetailsFragment(
+                        Long.parseLong(((Proceeding)parent.getItemAtPosition(position)).getId()));
+            }
+        });
     }
 
     @Override
@@ -318,12 +325,6 @@ public class ProceedingsListFragment extends Fragment {
             title.setText(proceeding.getTitle());
             description.setText(proceeding.getDescription());
             responsibleBody.setText(proceeding.getDependence().getOrganization());
-            convertView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mListener.goToProceedingDetailsFragment(Long.parseLong(getItem(position).getId()));
-                }
-            });
             return convertView;
         }
     }

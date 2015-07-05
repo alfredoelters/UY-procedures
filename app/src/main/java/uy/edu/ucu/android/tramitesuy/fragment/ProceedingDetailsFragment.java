@@ -56,8 +56,8 @@ public class ProceedingDetailsFragment extends Fragment {
             return new CursorLoader(getActivity(),
                     ProceedingsContract.ProceedingEntry.buildProceedingUri(mProceedingId),
                     null,
-                    ProceedingsContract.ProceedingEntry.TABLE_NAME+"._id = ?",
-                    new String[]{String.valueOf(mProceedingId)},
+                    null,
+                    null,
                     null);
         }
 
