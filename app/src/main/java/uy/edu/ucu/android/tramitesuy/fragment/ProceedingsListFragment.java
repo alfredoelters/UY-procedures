@@ -266,14 +266,7 @@ public class ProceedingsListFragment extends Fragment {
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                mSelectedCategory = null;
-                mSearchCriteria = query;
-                if (getLoaderManager().getLoader(PROCEEDINGS_LOADER) == null) {
-                    getLoaderManager().initLoader(PROCEEDINGS_LOADER, null, mProceedingsLoaderCallbacks);
-                } else {
-                    getLoaderManager().restartLoader(PROCEEDINGS_LOADER, null, mProceedingsLoaderCallbacks);
-                }
-                return true;
+                return false;
             }
 
             @Override
