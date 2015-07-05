@@ -1,7 +1,6 @@
 package uy.edu.ucu.android.tramitesuy.fragment;
 
 import android.app.Activity;
-import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,8 +8,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -36,21 +39,22 @@ public class ProceedingsListFragment extends Fragment {
 
     private static final String TAG = ProceedingsListFragment.class.getSimpleName();
     private static final String SPINNER_POSITION = "spinner_position";
+    private static final String EXTRA_SEARCH_CRITERIA = "search_criteria";
     private static final int CATEGORIES_LOADER = 0;
     private static final int PROCEEDINGS_LOADER = 1;
 
     private OnFragmentInteractionListener mListener;
 
     private SearchView mSearchView;
+    private MenuItem mSearchMenuItem;
     private Spinner mCategoriesSpinner;
     private ListView mProceedingsListView;
     private CategoryAdapter mCategoryAdapter;
     private ProceedingAdapter mProceedingAdapter;
 
     private Category mSelectedCategory;
-    private String mSearchCriteria;
     private int mSpinnerSelectedItemPosition;
-
+    private String mSearchCriteria;
 
 
     private final LoaderManager.LoaderCallbacks mCategoriesLoaderCallbacks = new LoaderManager.LoaderCallbacks<Cursor>() {
@@ -100,9 +104,10 @@ public class ProceedingsListFragment extends Fragment {
                         null,
                         null);
             } else {
-                selectionArgs = new String[]{mSearchCriteria, mSearchCriteria};
-                selection = ProceedingsContract.ProceedingEntry.COLUMN_DEPENDS_ON + " = ? OR" +
-                        ProceedingsContract.ProceedingEntry.COLUMN_TITLE + "= ?";
+                String searchCriteria = "%" + mSearchCriteria + "%";
+                selection = ProceedingsContract.ProceedingEntry.COLUMN_DEPENDS_ON + " LIKE ? OR " +
+                        ProceedingsContract.ProceedingEntry.COLUMN_TITLE + " LIKE ?";
+                selectionArgs = new String[]{searchCriteria, searchCriteria};
                 loader = new CursorLoader(getActivity(),
                         ProceedingsContract.ProceedingEntry.CONTENT_URI,
                         null,
@@ -152,6 +157,7 @@ public class ProceedingsListFragment extends Fragment {
 
     public interface OnFragmentInteractionListener {
         void setTitle(String title);
+
         void goToProceedingDetailsFragment(long proceedingId);
     }
 
@@ -169,6 +175,7 @@ public class ProceedingsListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Nullable
@@ -205,7 +212,7 @@ public class ProceedingsListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mListener.goToProceedingDetailsFragment(
-                        Long.parseLong(((Proceeding)parent.getItemAtPosition(position)).getId()));
+                        Long.parseLong(((Proceeding) parent.getItemAtPosition(position)).getId()));
             }
         });
     }
@@ -216,6 +223,7 @@ public class ProceedingsListFragment extends Fragment {
         mListener.setTitle(getString(R.string.app_name));
         if (savedInstanceState != null) {
             mSpinnerSelectedItemPosition = savedInstanceState.getInt(SPINNER_POSITION);
+            mSearchCriteria = savedInstanceState.getString(EXTRA_SEARCH_CRITERIA);
         }
         getLoaderManager().initLoader(CATEGORIES_LOADER, null, mCategoriesLoaderCallbacks);
     }
@@ -250,10 +258,37 @@ public class ProceedingsListFragment extends Fragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_home, menu);
+        mSearchMenuItem = menu.findItem(R.id.search_proceeding_action);
+        mSearchView = (SearchView) MenuItemCompat.getActionView(mSearchMenuItem);
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                mSelectedCategory = null;
+                mSearchCriteria = newText;
+                if (getLoaderManager().getLoader(PROCEEDINGS_LOADER) == null) {
+                    getLoaderManager().initLoader(PROCEEDINGS_LOADER, null, mProceedingsLoaderCallbacks);
+                } else {
+                    getLoaderManager().restartLoader(PROCEEDINGS_LOADER, null, mProceedingsLoaderCallbacks);
+                }
+                return true;
+            }
+        });
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (mCategoriesSpinner != null){
+        if (mCategoriesSpinner != null) {
             outState.putInt(SPINNER_POSITION, mCategoriesSpinner.getSelectedItemPosition());
+            outState.putString(EXTRA_SEARCH_CRITERIA, mSearchCriteria);
         }
     }
 
@@ -266,7 +301,7 @@ public class ProceedingsListFragment extends Fragment {
             mCategories = categories;
         }
 
-        public void setCategoriesData(List<Category> categories){
+        public void setCategoriesData(List<Category> categories) {
             mCategories.clear();
             mCategories.addAll(categories);
             notifyDataSetChanged();
