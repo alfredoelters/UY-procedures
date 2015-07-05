@@ -10,6 +10,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,9 @@ import uy.edu.ucu.android.tramitesuy.provider.ProceedingsContract;
  */
 public class ProceedingsListFragment extends Fragment {
 
+
+    private static final String TAG = ProceedingsListFragment.class.getSimpleName();
+    private static final String SPINNER_POSITION = "spinner_position";
     private static final int CATEGORIES_LOADER = 0;
     private static final int PROCEEDINGS_LOADER = 1;
 
@@ -46,11 +50,14 @@ public class ProceedingsListFragment extends Fragment {
 
     private Category mSelectedCategory;
     private String mSearchCriteria;
+    private int mSpinnerSelectedItemPosition;
+
 
 
     private final LoaderManager.LoaderCallbacks mCategoriesLoaderCallbacks = new LoaderManager.LoaderCallbacks<Cursor>() {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            Log.i(TAG, "onCreateLoader categories");
             return new CursorLoader(getActivity(),
                     ProceedingsContract.CategoryEntry.CONTENT_URI,
                     null,
@@ -61,6 +68,7 @@ public class ProceedingsListFragment extends Fragment {
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            Log.i(TAG, "onLoadFinished categories");
             if (data != null) {
                 List<Category> categories = new ArrayList<>();
                 Category category;
@@ -71,18 +79,20 @@ public class ProceedingsListFragment extends Fragment {
                     categories.add(category);
                 }
                 mCategoryAdapter.setCategoriesData(categories);
+                mCategoriesSpinner.setSelection(mSpinnerSelectedItemPosition);
             }
         }
 
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
-
+            Log.i(TAG, "onLoaderReset categories");
         }
     };
 
     private final LoaderManager.LoaderCallbacks mProceedingsLoaderCallbacks = new LoaderManager.LoaderCallbacks<Cursor>() {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            Log.i(TAG, "onCreateLoader proceedings");
             CursorLoader loader;
             String[] selectionArgs;
             String selection;
@@ -110,6 +120,7 @@ public class ProceedingsListFragment extends Fragment {
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            Log.i(TAG, "onLoadFinished proceedings");
             if (data != null) {
                 List<Proceeding> proceedings = new ArrayList<>();
                 Proceeding proceeding;
@@ -131,7 +142,7 @@ public class ProceedingsListFragment extends Fragment {
 
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
-
+            Log.i(TAG, "onLoaderReset proceedings");
         }
     };
 
@@ -199,6 +210,9 @@ public class ProceedingsListFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mListener.setTitle("TramitesUY");
+        if (savedInstanceState != null) {
+            mSpinnerSelectedItemPosition = savedInstanceState.getInt(SPINNER_POSITION);
+        }
         getLoaderManager().initLoader(CATEGORIES_LOADER, null, mCategoriesLoaderCallbacks);
     }
 
@@ -206,6 +220,23 @@ public class ProceedingsListFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (getLoaderManager().getLoader(CATEGORIES_LOADER) != null) {
+            getLoaderManager().destroyLoader(CATEGORIES_LOADER);
+        }
+        if (getLoaderManager().getLoader(PROCEEDINGS_LOADER) != null) {
+            getLoaderManager().destroyLoader(PROCEEDINGS_LOADER);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(SPINNER_POSITION, mCategoriesSpinner.getSelectedItemPosition());
     }
 
     private class CategoryAdapter extends ArrayAdapter<Category> {
