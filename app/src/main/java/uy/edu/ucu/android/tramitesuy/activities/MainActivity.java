@@ -116,8 +116,13 @@ public class MainActivity extends AppCompatActivity implements ProceedingsListFr
     public void onBackPressed(){
         if(mDrawerLayout.isDrawerOpen(GravityCompat.START))
             mDrawerLayout.closeDrawer(GravityCompat.START);
-        else
+        else {
             super.onBackPressed();
+            if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                getSupportFragmentManager().popBackStackImmediate();
+            }
+        }
+
     }
 
     @Override
@@ -144,4 +149,6 @@ public class MainActivity extends AppCompatActivity implements ProceedingsListFr
                 .replace(R.id.container, ProceedingTabsFragment.newInstance(proceedingId))
                 .addToBackStack(null).commit();
     }
+
+
 }

@@ -49,7 +49,7 @@ public class ProceedingsProvider extends ContentProvider {
         matcher.addURI(authority, ProceedingsContract.PATH_CATEGORY + "/#", CATEGORY_ITEM);
         matcher.addURI(authority, ProceedingsContract.PATH_CATEGORY + "/*/" + ProceedingsContract.PATH_PROCEEDING, CATEGORY_PROCEEDINGS);
         matcher.addURI(authority, ProceedingsContract.PATH_LOCATION, LOCATION_DIR);
-        matcher.addURI(authority, ProceedingsContract.PATH_LOCATION + "/#", PROCEEDING_LOCATIONS);
+        matcher.addURI(authority, ProceedingsContract.PATH_LOCATION + "/" + ProceedingsContract.PATH_PROCEEDING + "/#", PROCEEDING_LOCATIONS);
         //TODO: add missing matches for the new URIs and their respective code
 
         return matcher;
@@ -175,8 +175,11 @@ public class ProceedingsProvider extends ContentProvider {
                 break;
             }
             case PROCEEDING_LOCATIONS: {
+                String where = ProceedingsContract.LocationEntry.COLUMN_PROC_KEY + " = ?";
+                long proceedingId = ProceedingsContract.LocationEntry.getProceedingFromUri(uri);
+                String[] whereArgs = {String.valueOf(proceedingId)};
                 cursor = db.query(ProceedingsContract.LocationEntry.TABLE_NAME, projection,
-                        selection, selectionArgs, null, null, sortOrder);
+                        where, whereArgs, null, null, sortOrder);
                 break;
             }
             default:

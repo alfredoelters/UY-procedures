@@ -68,7 +68,6 @@ public class ProceedingsOpenHelper extends SQLiteOpenHelper {
                 " FOREIGN KEY (" + LocationEntry.COLUMN_PROC_KEY + ") REFERENCES " +
                 ProceedingEntry.TABLE_NAME + " (" + ProceedingEntry._ID + "));";
 
-
         db.execSQL(SQL_CREATE_CATEGORIES_TABLE);
         db.execSQL(SQL_CREATE_PROCEEDINGS_TABLE);
         db.execSQL(SQL_CREATE_LOCATION_TABLE);

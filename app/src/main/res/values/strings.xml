@@ -18,4 +18,6 @@
     <string name="proceeding_status">Estado</string>
     <string name="proceeding_category">Categoría</string>
     <string name="proceeding_when_and_where">Cuando y donde</string>
+    <string name="no_locations">No se encontraron lugares donde realizar el tramite</string>
+    <string name="loading_locations">Cargando localidades, por favor espere.</string>
 </resources>

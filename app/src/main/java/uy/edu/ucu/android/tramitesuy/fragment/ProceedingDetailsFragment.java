@@ -147,7 +147,6 @@ public class ProceedingDetailsFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mProceedingId = getArguments().getLong(KEY_PROCEEDING_ID);
         try {
             mListener = (OnFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
@@ -159,10 +158,16 @@ public class ProceedingDetailsFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null) {
+        if (getArguments() != null) {
+            mProceedingId = getArguments().getLong(KEY_PROCEEDING_ID);
+        } else if (savedInstanceState != null) {
             mProceedingId = savedInstanceState.getLong(KEY_PROCEEDING_ID);
         }
-        getLoaderManager().initLoader(PROCEEDING_LOADER, null, mProceedingLoaderCallbacks);
+        if (getLoaderManager().getLoader(PROCEEDING_LOADER) != null) {
+            getLoaderManager().restartLoader(PROCEEDING_LOADER, null, mProceedingLoaderCallbacks);
+        } else {
+            getLoaderManager().initLoader(PROCEEDING_LOADER, null, mProceedingLoaderCallbacks);
+        }
     }
 
     @Override
