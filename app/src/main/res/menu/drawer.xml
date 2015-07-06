@@ -2,8 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group>
         <item
-            android:id="@+id/actionTest"
-            android:icon="@android:drawable/btn_star"
-            android:title="test"/>
+            android:id="@+id/action_logout"
+            android:icon="@drawable/com_facebook_button_icon"
+            android:title="@string/logout"/>
     </group>
 </menu>

@@ -5,7 +5,15 @@
     android:orientation="vertical">
 
     <TextView
+        android:id="@+id/user_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="hola" />
+        android:gravity="center"
+        android:textColor="@color/mustard"
+        android:textSize="20sp" />
+
+    <com.facebook.login.widget.ProfilePictureView
+        android:id="@+id/facebook_profile_picture"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 </LinearLayout>
